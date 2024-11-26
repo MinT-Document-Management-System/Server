@@ -13,10 +13,10 @@ exports.getRoleById = async (id) => {
 };
 
 // Create a new role
-exports.createRole = async ({ roleName, permissions }) => {
+exports.createRole = async ({ role_name, role_description, created_at }) => {
   const result = await pool.query(
-    'INSERT INTO roles (role_name, permissions) VALUES ($1, $2) RETURNING *',
-    [roleName, permissions]
+    'INSERT INTO roles (role_name, role_description,created_at) VALUES ($1, $2, $3) RETURNING *',
+    [role_name, role_description,created_at]
   );
   return result.rows[0];
 };
