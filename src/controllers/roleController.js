@@ -1,4 +1,4 @@
-const roleService = require('./roleService');
+const roleService = require('../services/rolesServices');
 
 // Get all roles
 exports.getAllRoles = async (req, res) => {
@@ -27,8 +27,9 @@ exports.getRoleById = async (req, res) => {
 // Create a new role
 exports.createRole = async (req, res) => {
   try {
-    const { roleName, permissions } = req.body;
-    const newRole = await roleService.createRole({ roleName, permissions });
+    const { role_name, role_description } = req.body;
+    const created_at = new Date().toISOString();
+    const newRole = await roleService.createRole({ role_name, role_description ,created_at});
     res.status(201).json(newRole);
   } catch (error) {
     console.error('Error creating role:', error);
@@ -60,3 +61,4 @@ exports.deleteRole = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete role.' });
   }
 };
+// module.exports = roleController;
