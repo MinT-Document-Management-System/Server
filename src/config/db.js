@@ -1,20 +1,36 @@
 require('dotenv').config();
 
-const { Pool } = require('pg');
+const { Sequelize } = require('sequelize')            // As our development is based on model, we use sequelize package instead of Pool 
 
 // PostgreSQL connection configuration
-const pool = new Pool({
-  host: process.env.PG_HOST, // Replace with your Supabase host
-  port: process.env.PG_PORT,                         // Default PostgreSQL port
-  database: process.env.PG_DATABASE,               // Replace with your database name
-  user: process.env.PG_USER,         // Replace with your username
-  password: process.env.PG_PASSWORD, // Replace with your password
-  ssl: {
+const sequelize = new Sequelize(
+  process.env.PG_DATABASE,
+  process.env.PG_USER,
+  process.env.PG_PASSWORD, 
+  {
+    host: process.env.PG_HOST,
+    port: process.env.PG_PORT,
+    dialect: 'postgres',
+    logging: false,  // (optional)
+    dialectOptions: {
+      ssl: {
+        require: true,              // SSL is forced
+        rejectUnauthorized: false   // self-assigned certificates are allowed
+      }
+    }
+  }
 
-    rejectUnauthorized: false,
-    mode: 'prefer',         // Disable strict SSL certificate checks
-  }, // Ensure SSL is enabled
-});
+)
 
-// Export the pool to use in other files
-module.exports = pool;
+const connectToDatabase = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection to Supabase PostgreSQL has been established successfully.')
+  } catch {
+    console.log('Unable to connect to the database:', error);
+  }
+}
+
+connectToDatabase();
+
+module.exports = sequelize;
