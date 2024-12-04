@@ -33,7 +33,7 @@ const User = sequelize.define('User', {
   role_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'roles',
+      model: 'Roles',
       key: 'role_id',
     },
     allowNull: true,
@@ -41,10 +41,9 @@ const User = sequelize.define('User', {
   department_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'department',
+      model: 'Department',
       key: 'department_id',
-    },
-    allowNull: true,
+    }
   },
   account_status: {
     type: DataTypes.STRING(20),
@@ -66,5 +65,7 @@ const User = sequelize.define('User', {
   tableName: 'users',
   timestamps: false, // Sequelize's built-in timestamps is avoided
 });
+
+// User.sync({alter: false}) 
 
 module.exports = User;

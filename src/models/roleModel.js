@@ -32,4 +32,6 @@ const Role = sequelize.define('Role', // The model name
   }
 );
 
+// Role.sync({alter: false})
+
 module.exports = Role;
