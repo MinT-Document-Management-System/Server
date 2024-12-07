@@ -1,36 +1,83 @@
-const pool = require('../config/db'); // Import database connection
+const Role = require("../models/roleModel")
 
-// Get all roles
-exports.getAllRoles = async () => {
-  const result = await pool.query('SELECT * FROM roles');
-  return result.rows;
-};
+class RolesService{
+  
+  // Create a new role
+  async create_role(role_data) {
+    const {role_name, role_description} = role_data
+    if (!role_name || !role_description) {
+      return {"success":false, error: "Role name and description are required!"}
+    }
+    try {
+      await Role.create({role_name, role_description})
+      return {"success":true, message: "Role has been added successfully"}
+    } catch (error) {
+      return {"success":false, error}
+    }
+  }
 
-// Get a specific role by ID
-exports.getRoleById = async (id) => {
-  const result = await pool.query('SELECT * FROM roles WHERE id = $1', [id]);
-  return result.rows[0];
-};
 
-// Create a new role
-exports.createRole = async ({ role_name, role_description, created_at }) => {
-  const result = await pool.query(
-    'INSERT INTO roles (role_name, role_description,created_at) VALUES ($1, $2, $3) RETURNING *',
-    [role_name, role_description,created_at]
-  );
-  return result.rows[0];
-};
+  //Get a specific role by id
+  async get_role(role_id){
+    try {
+        const role = await Role.findByPk(role_id)
+        return {"success": true, role}
+    } catch (error) {
+        return {"success": false, error}
+    } 
+  }  
 
-// Update an existing role
-exports.updateRole = async (id, { roleName, permissions }) => {
-  const result = await pool.query(
-    'UPDATE roles SET role_name = $1, permissions = $2 WHERE id = $3 RETURNING *',
-    [roleName, permissions, id]
-  );
-  return result.rows[0];
-};
 
-// Delete a role
-exports.deleteRole = async (id) => {
-  await pool.query('DELETE FROM roles WHERE id = $1', [id]);
-};
+  // Get all roles
+  async get_all_roles(){
+    try {
+        const all_roles = await Role.findAll()
+        return {"success": true, all_roles}
+    } catch (error) {
+        return {"success": false, error}
+    }
+  } 
+
+
+  // Update an existing role
+  async update_role(update_data){
+      //Removing role_identifier id from update_data
+      const {role_id, ...updateAttributes} = update_data
+      if (Object.keys(updateAttributes).length === 0) {
+          return {"success": false, "error":'No valid attributes provided for update'}
+        }
+
+      try {
+          await role.update(updateAttributes, {where: {role_id}})
+          await this.role_row_updated(role_id)
+          return { "success": true, message: 'Role data updated successfully' };
+      } catch (error) {
+          return {"success": false, error}
+      }
+  }
+
+
+  //Track last updated time
+  async role_row_updated(role_id){
+    updated_role = await Role.findByPk(role_id)
+    if (updated_role) {
+        updated_role.updated_at = new Date()
+        await updated_role.save() 
+    }
+  }
+
+
+  // Delete a role
+  async delete_role(role_id){
+    try {
+        const role = await Role.findByPk(role_id)
+        await role.destroy()
+        return {"success": true, message:"Role has been deleted successully."}
+    } catch (error) {
+
+    }
+  }
+}
+
+
+module.exports = RolesService

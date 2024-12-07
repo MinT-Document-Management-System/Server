@@ -26,7 +26,7 @@ const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log('Connection to Supabase PostgreSQL has been established successfully.')
-  } catch {
+  } catch(error) {
     console.log('Unable to connect to the database:', error);
   }
 }

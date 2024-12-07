@@ -1,5 +1,5 @@
 const express = require('express');
-const Routes  = require('./routes/roleRoutes');// Import the PostgreSQL pool
+const Routes  = require('./routes/mainRoutes');
 
 const app = express();
 const PORT = 3000;
