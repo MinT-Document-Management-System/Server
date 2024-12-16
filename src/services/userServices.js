@@ -90,7 +90,7 @@ class UserService {
 
 
 
-    async login_with_email(email) {
+    async login_with_email(email, password) {
         const user = User.findOne({
             where: {email}
         })
@@ -101,7 +101,13 @@ class UserService {
             user_id = user.user_id
             full_name = user.full_name
             username = user.username
-            jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
+            role_id = user.role_id
+            stored_password = user.password
+            const is_valid = await bcrypt.compare(password, stored_password)
+            if (!is_valid){
+                return {"success": false, "error": "Wrong password!"}
+            }
+            jwt_token = jwt.sign({user_id, full_name, email, username, role_id}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
             return {"success": true, jwt_token}
         }
     }
