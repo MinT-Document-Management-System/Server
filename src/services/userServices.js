@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
+const bcrypt = require("bcrypt")
 const Role = require("../models/roleModel")
 const Department = require("../models/departmentModel")
 const User = require("../models/userModel")
@@ -37,10 +38,10 @@ class UserService {
                 department_id: department.department_id,
                 is_pass_temp: true })
             return {"success": true, user: newUser}
-            
+
         } catch (error) {
             return {"success": false, "error": error}
-        }   
+        }
     }
 
 
@@ -54,7 +55,7 @@ class UserService {
                 password: old_password,
                 is_pass_temp: true,
             }})
-        
+
             if(user) {
                 user.password = hash_password(new_password)
                 await user.save()
@@ -62,7 +63,7 @@ class UserService {
                 user_id = user.user_id
                 full_name = user.full_name
                 jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
-                
+
                 return {"success": true, "message": "Password has been changed successfully.", jwt_token}
             }
             else {
@@ -74,41 +75,43 @@ class UserService {
 
     async login_with_username(username){
         const user = User.findOne({
-            where: {username} 
+            where: {username}
         })
         if (!user){
             return {"success": false, "error": "Username can not be found"}
         }
         else {
-            user_id = user.user_id
-            full_name = user.full_name
-            email = user.email
-            jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
-            return {"success": true, jwt_token}            
+            const user_id = user.user_id
+            const full_name = user.full_name
+            const email = user.email
+            const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
+            return {"success": true, jwt_token}
         }
     }
 
 
 
     async login_with_email(email, password) {
-        const user = User.findOne({
+        const user = await User.findOne({
             where: {email}
         })
+        console.log(user,"user")
         if (!user){
             return {"success": false, "error": "Email can not be found."}
         }
         else {
-            user_id = user.user_id
-            full_name = user.full_name
-            username = user.username
-            role_id = user.role_id
-            stored_password = user.password
+            const user_id = user.user_id
+            const full_name = user.full_name
+            const username = user.username
+            const role_id = user.role_id
+            const stored_password = user.password
+            console.log(stored_password,password)
             const is_valid = await bcrypt.compare(password, stored_password)
             if (!is_valid){
                 return {"success": false, "error": "Wrong password!"}
             }
-            jwt_token = jwt.sign({user_id, full_name, email, username, role_id}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
-            return {"success": true, jwt_token}
+            const jwt_token = jwt.sign({user_id, full_name, email, username, role_id}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
+            return {"status":200,"success": true, jwt_token}
         }
     }
 
@@ -136,21 +139,21 @@ class UserService {
 
 
     /**** TBD: user_identifier is filtered on 1) service side, or 2) controller side ****/
-    
+
     async update_user_data(user_identifier, update_data) {
         //Removing user_identifier id from update_data
         const {user_id, ...updateAttributes} = update_data
         if (Object.keys(updateAttributes).length === 0) {
             return {"success": false, "error":'No valid attributes provided for update'}
           }
-        
+
         try {
             await user.update(updateAttributes, {where: {user_id}})
             await this.user_row_updated(user_id)
             return { "success": true, message: 'User data updated successfully' };
         } catch (error) {
             return {"success": false, error}
-        } 
+        }
     }
 
 
@@ -174,7 +177,7 @@ class UserService {
         updated_user = await User.findOne({where: {user_id}})
         if (updated_user) {
             updated_user.updated_at = new Date()
-            await updated_user.save() 
+            await updated_user.save()
         }
     }
 }
