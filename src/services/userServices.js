@@ -5,6 +5,7 @@ const Role = require("../models/roleModel")
 const Department = require("../models/departmentModel")
 const User = require("../models/userModel")
 const { generate_temp_password, hash_password } = require("./password-service/passwordGenerator")
+const sendResetPasswordEmailService = require("./emailService")
 
 class UserService {
 
@@ -16,6 +17,7 @@ class UserService {
         if(!email) {return {"success": false, "error": "Email is required"}}
         if(!role_name) {return {"success": false, "error": "Role is required"}}
         if(!department_name) {return {"success": false, "error": "Department is required"}}
+        if(!phone_number) {return {"success": false, "error": "Phone number is required"}}
 
         // Fetching role_id and department_id
         const role = await Role.findOne({where: {role_name: role_name}})
@@ -28,16 +30,21 @@ class UserService {
         }
 
         //Creating Temporary Password
-        password = generate_temp_password(8)
+        const password = await generate_temp_password(8)
 
         //Creating user
         try {
-            newUser = await User.create({
-                username, email, password, full_name, email,
+            const newUser = await User.create({
+                username, email, password, full_name, email, phone_number,
                 role_id: role.role_id,
                 department_id: department.department_id,
                 is_pass_temp: true })
-            return {"success": true, user: newUser}
+            const link = "http://localhost:3000/reset_password"
+            const emailService = await sendResetPasswordEmailService(email,link,password)
+            if (!emailService.success) { return {
+                "success":false, "error":emailService.error
+            }}
+            return {"status":200,"success": true}
 
         } catch (error) {
             return {"success": false, "error": error}
@@ -46,23 +53,26 @@ class UserService {
 
 
 
-    async update_password_OTP(userdata){
-        const {username, email, old_password, new_password} = userdata
+    async reset_password(userdata){
+        const {email, old_password, new_password,confirm_password} = userdata
+        if (new_password !== confirm_password){
+            return {"success":false, "error":"Password doesn't match"}
+        }
         const user = await User.findOne({
             where: {
-                username: username,
                 email: email,
                 password: old_password,
                 is_pass_temp: true,
             }})
 
             if(user) {
-                user.password = hash_password(new_password)
+                user.password = await hash_password(new_password)
+                user.is_pass_temp=false
                 await user.save()
 
-                user_id = user.user_id
-                full_name = user.full_name
-                jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
+                const user_id = user.user_id
+                const full_name = user.full_name
+                const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
 
                 return {"success": true, "message": "Password has been changed successfully.", jwt_token}
             }
