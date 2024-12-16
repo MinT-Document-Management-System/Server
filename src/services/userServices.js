@@ -46,8 +46,8 @@ class UserService {
 
 
 
-    async update_password_OTP(userdata){
-        const {username, email, old_password, new_password} = userdata
+    async reset_password(userdata){
+        const {email, old_password, new_password} = userdata
         const user = await User.findOne({
             where: {
                 username: username,
