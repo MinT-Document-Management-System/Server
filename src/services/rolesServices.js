@@ -80,4 +80,4 @@ class RolesService{
 }
 
 
-module.exports = RolesService
+module.exports = new RolesService()
