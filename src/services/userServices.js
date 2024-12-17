@@ -53,11 +53,8 @@ class UserService {
 
 
 
-    async reset_password(userdata){
-        const {email, old_password, new_password,confirm_password} = userdata
-        if (new_password !== confirm_password){
-            return {"success":false, "error":"Password doesn't match"}
-        }
+    async update_password_OTP(userdata){
+        const {username, email, old_password, new_password} = userdata
         const user = await User.findOne({
             where: {
                 email: email,
