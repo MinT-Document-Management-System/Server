@@ -53,7 +53,7 @@ class UserService {
 
 
 
-    async update_password_OTP(userdata){
+    async reset_password(userdata){
         const {username, email, old_password, new_password} = userdata
         const user = await User.findOne({
             where: {
@@ -102,7 +102,6 @@ class UserService {
         const user = await User.findOne({
             where: {email}
         })
-        console.log(user,"user")
         if (!user){
             return {"success": false, "error": "Email can not be found."}
         }
@@ -112,7 +111,6 @@ class UserService {
             const username = user.username
             const role_id = user.role_id
             const stored_password = user.password
-            console.log(stored_password,password)
             const is_valid = await bcrypt.compare(password, stored_password)
             if (!is_valid){
                 return {"success": false, "error": "Wrong password!"}
@@ -131,14 +129,17 @@ class UserService {
         }
         else {
             try {
-                role_name = (await Role.findOne({where: {role_id}})).role_name
-                department_name = (await Department.findOne({where: {department_id}})).department_name
+                const role_name = (await Role.findOne({where: {role_id}})).role_name
+                const department_name = (await Department.findOne({where: {department_id}})).department_name
             } catch {
-                role_name = "Could not be fetched"
-                department_name = "Could not be fetched"
+                const role_name = "Could not be fetched"
+                const department_name = "Could not be fetched"
             }
-            const {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at} = user
-            userData = {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, role_name, department_name}
+            const {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, is_pass_temp} = user
+            if(is_pass_temp) {
+                return {"success": false, "error": "Temporary password is not reset."}
+            }
+            const userData = {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, role_name, department_name}
             return {"success": true, userData}
         }
     }
@@ -181,7 +182,7 @@ class UserService {
 
 
     async user_row_updated(user_id){
-        updated_user = await User.findOne({where: {user_id}})
+        const updated_user = await User.findOne({where: {user_id}})
         if (updated_user) {
             updated_user.updated_at = new Date()
             await updated_user.save()

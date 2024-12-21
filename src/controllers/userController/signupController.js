@@ -1,9 +1,9 @@
 const Userservice = require('../../services/userServices')
 
 const signup = async function (req, res) {
-    userdata = req.body
+    const userdata = req.body
 
-    newUser = await Userservice.createUser(userdata)
+    const newUser = await Userservice.createUser(userdata)
 
     res.send(newUser)
 }

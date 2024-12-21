@@ -21,9 +21,14 @@ const Letter_Document = sequelize.define("Letter_Document",
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        filepath: {
+        file_path: {
             type: DataTypes.STRING(255),
             allowNull: false,
+        },
+        cloudinary_public_id: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            unique: true,
         },
         document_type: {
             type: DataTypes.STRING(50),
@@ -58,4 +63,4 @@ const Letter_Document = sequelize.define("Letter_Document",
 // Letter_Document.sync({alter: false})
 
 
-module.expors = Letter_Document
+module.exports = Letter_Document

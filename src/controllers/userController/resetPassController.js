@@ -1,9 +1,9 @@
 const Userservice = require('../../services/userServices')
 
 const reset_password = async function (req, res) {
-    userdata = req.body
+    const userdata = req.body
 
-    token = await Userservice.reset_password(userdata)
+    const token = await Userservice.reset_password(userdata)
 
     res.send(token)
 }
