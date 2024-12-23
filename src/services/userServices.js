@@ -54,7 +54,7 @@ class UserService {
 
 
     async reset_password(userdata){
-        const {username, email, old_password, new_password} = userdata
+        const {email, old_password, new_password} = userdata
         const user = await User.findOne({
             where: {
                 email: email,
@@ -69,6 +69,7 @@ class UserService {
 
                 const user_id = user.user_id
                 const full_name = user.full_name
+                const username = user.username
                 const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
 
                 return {"success": true, "message": "Password has been changed successfully.", jwt_token}
@@ -79,7 +80,7 @@ class UserService {
     }
 
 
-
+//      TBD
     async login_with_username(username){
         const user = User.findOne({
             where: {username}
@@ -122,8 +123,8 @@ class UserService {
 
 
 
-    async get_user_data(user_identifier) {
-        const user = await User.findOne({where: {user_id: user_identifier}})
+    async get_user_data(email) {
+        const user = await User.findOne({where: {email}})
         if (!user) {
             return {"success": false, "error": "User can not be found"}
         }
@@ -146,9 +147,7 @@ class UserService {
 
 
 
-    /**** TBD: user_identifier is filtered on 1) service side, or 2) controller side ****/
-
-    async update_user_data(user_identifier, update_data) {
+    async update_user_data(update_data) {
         //Removing user_identifier id from update_data
         const {user_id, ...updateAttributes} = update_data
         if (Object.keys(updateAttributes).length === 0) {
@@ -156,7 +155,7 @@ class UserService {
           }
 
         try {
-            await user.update(updateAttributes, {where: {user_id}})
+            await User.update(updateAttributes, {where: {user_id}})
             await this.user_row_updated(user_id)
             return { "success": true, message: 'User data updated successfully' };
         } catch (error) {
@@ -166,8 +165,8 @@ class UserService {
 
 
 
-    async delete_user(user_identifier){
-        const user = await User.findByPk(user_identifier)
+    async delete_user(user_id){
+        const user = await User.findByPk(user_id)
         if (!user) return {"success": false, error: "User can not be found"}
 
         try {
