@@ -12,7 +12,7 @@ main_router.use('/role', role_routes)
 main_router.use('/user', user_routes)
 // Letter Router
 main_router.use('/letter', letter_routes)
-
-// main_router.use('/department', department_routes)
+// Department Router
+main_router.use('/department', department_routes)
 
 module.exports = main_router

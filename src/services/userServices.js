@@ -182,6 +182,17 @@ class UserService {
     }
 
 
+    async username_check(username){
+        if(!username){ const error = new Error("Username is not provided");
+            error.status = 400; throw error;}
+        const users = await User.findAll({where: {username}})
+        if(users.length === 0){return }
+        else{const error = new Error("Username is already taken");
+            error.status = 409; throw error;
+        }
+    }
+
+
 
     async user_row_updated(user_id){
         const updated_user = await User.findOne({where: {user_id}})
