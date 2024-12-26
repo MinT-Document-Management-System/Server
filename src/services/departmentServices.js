@@ -35,7 +35,7 @@ class DepartmentService {
             {
                 model: User,
                 as: 'head', // Alias defined in the association
-                attributes: ['id', 'full_name'], // Fetch only necessary fields
+                attributes: ['user_id', 'full_name'], // Fetch only necessary fields
             },
         ],
     });
