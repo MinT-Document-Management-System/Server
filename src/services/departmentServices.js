@@ -11,29 +11,48 @@ class DepartmentService {
             const existing_department = await Department.findOne({where: {department_name}})
             if(existing_department){const error = new Error("Department already exists");
                 error.status = 409; throw error}
-            
+
             if(!department_description) department_description = "No description"
             const department = await Department.create({department_name, department_head_id, department_description})
             return department
-            
+
         } catch (error) {
             error.message = `Department creation failed: ${error.message}`
             throw error
         }
-        
+
     }
 
     async get_department_details(department_name){
         if(!department_name){const error = new Error("Department name is required");
             error.status = 400; throw error;}
-        const department = Department.findOne({where: {department_name}})
+
+
+        const department = await Department.findOne({
+        where: { department_name },
+        include: [
+            {
+                model: User,
+                as: 'head', // Alias defined in the association
+                attributes: ['id', 'full_name'], // Fetch only necessary fields
+            },
+        ],
+    });
+
         if(!department){const error = new Error("Department can not be found");
             error.status = 404; throw error;}
         return department;
     }
 
-    async get_all_departments(){
-        const all_departments = await Department.findAll()
+    async get_all_departments(page , pageSize){
+        const offset = (page - 1) * pageSize;
+        const limit = pageSize;
+
+        // Fetch the departments with pagination
+        const all_departments = await Department.findAndCountAll({
+            offset: offset,
+            limit: limit,
+        });
         if(all_departments.length === 0){ const error = new Error("No departments found");
             error.status = 404; throw error;}
         return all_departments
