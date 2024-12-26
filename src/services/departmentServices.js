@@ -81,6 +81,22 @@ class DepartmentService {
             error.status = 404; throw error;}
         return all_departments
     }
+    async delete_department(department_id){
+        const department = await Department.findByPk(department_id)
+        if(!department){
+            const error = new Error("The department is not found")
+            error.status = 404
+            throw error
+        }
+        const deleted_department = await department.destroy(department)
+        if(!deleted_department){
+            const error = new Error("The department couldn't be deleted")
+            error.status = 500
+            throw error
+        }
+        return deleted_department
+    }
 }
+
 
 module.exports = new DepartmentService()
