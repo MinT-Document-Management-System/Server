@@ -1,6 +1,5 @@
 const express = require("express")
-const upload_letter = require("../controllers/letterController/uploadController")
-const get_letter = require("../controllers/letterController/retrieveController")
+const { upload_letter, get_letter } = require("../controllers/letterController/letterControllers")
 const upload = require("../services/file-services/multerService.js")
 
 

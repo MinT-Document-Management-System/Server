@@ -1,7 +1,5 @@
 const express = require("express")
-const add_department = require("../controllers/departmentController/addDepartmentController")
-const get_all_departments = require("../controllers/departmentController/getAllDepartmentsController")
-const get_department_details = require("../controllers/departmentController/getDepartmentController")
+const { add_department, get_all_departments, get_department_details } = require("../controllers/departmentController/departmentControllers")
 
 const router = express.Router()
 

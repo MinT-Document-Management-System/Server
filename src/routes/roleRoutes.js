@@ -1,5 +1,5 @@
 const express = require('express');
-const roleController = require('../controllers/roleController'); // Import the controller
+const roleController = require('../controllers/roleController/roleControllers'); // Import the controller
 
 const router = express.Router();
 

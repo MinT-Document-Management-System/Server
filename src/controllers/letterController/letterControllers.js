@@ -12,4 +12,13 @@ const upload_letter = async function (req, res) {
     
 }
 
-module.exports = upload_letter
+const get_letter = async function (req, res) {
+    const public_id = req.params.public_id
+
+    const private_url = await LetterService.get_letter_from_cloudinary(public_id)
+
+    res.send(private_url)
+    
+}
+
+module.exports = { upload_letter, get_letter }
