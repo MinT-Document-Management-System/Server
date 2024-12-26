@@ -51,4 +51,24 @@ const username_checker = async function (req, res) {
     }
 }
 
-module.exports = { login, signup, reset_password, username_checker }
+const get_user_data = async function (req, res) {
+    try {
+        const user_id = req.params.user_id;
+        const result = await UserService.get_user_data(user_id)
+        res.status(200).json(result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+
+const get_all_users = async function (req, res) {
+    try {
+        const result = await UserService.get_all_users();
+        res.status(200).json(result);
+
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})        
+    }
+}
+
+module.exports = { login, signup, reset_password, username_checker, get_user_data, get_all_users }
