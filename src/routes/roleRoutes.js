@@ -14,4 +14,4 @@ router.put('/updateRole/:role_id', roleController.updateRole);
 // Delete a Role Route
 router.delete('/deleteRole/:role_id', roleController.deleteRole);
 
-module.exports = role_router;
+module.exports = router;

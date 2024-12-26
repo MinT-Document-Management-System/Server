@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require('../config/db')
 
-const Document_Department_Access = sequelize.define("Document_Department_Access", 
+const Document_Department_Access = sequelize.define("Document_Department_Access",
     {
         access_id: {
             type: DataTypes.INTEGER,
@@ -31,7 +31,7 @@ const Document_Department_Access = sequelize.define("Document_Department_Access"
             defaultValue: "Read",
             allowNull: true
         }
-    }, 
+    },
     {
         tableName: 'document_department_access',
         timestamps: false
