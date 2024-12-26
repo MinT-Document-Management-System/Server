@@ -29,21 +29,22 @@ class DepartmentService {
         if(!department_name){const error = new Error("Department name is required");
             error.status = 400; throw error;}
         const query = `SELECT
-    d.department_id,
-    d.department_name,
-    d.department_description,
-    d.created_at,
-    d.updated_at,
-    u.full_name AS department_head_name
-FROM
-    department AS d
-LEFT JOIN
-    users AS u
-ON
-    d.department_head_id = u.user_id
-WHERE
-    d.department_name = department_name
-`
+        d.department_id,
+        d.department_name,
+        d.department_description,
+        d.created_at,
+        d.updated_at,
+        u.full_name AS department_head_name
+        FROM
+            department AS d
+        LEFT JOIN
+            users AS u
+        ON
+            d.department_head_id = u.user_id
+        WHERE
+            d.department_name = department_name
+
+        `
         const department = await sequelize.query(query);
 
         if(!department){const error = new Error("Department can not be found");
@@ -51,14 +52,30 @@ WHERE
         return department;
     }
 
-    async get_all_departments(page , pageSize){
+    async get_all_departments(page,pageSize){
         const offset = (page - 1) * pageSize;
         const limit = pageSize;
-
-        // Fetch the departments with pagination
-        const all_departments = await Department.findAndCountAll({
-            offset: offset,
-            limit: limit,
+        const query = `SELECT
+        d.department_id,
+        d.department_name,
+        d.department_description,
+        d.created_at,
+        d.updated_at,
+        u.full_name AS department_head_name
+        FROM
+            department AS d
+        LEFT JOIN
+            users AS u
+        ON
+            d.department_head_id = u.user_id
+         ORDER BY
+                d.department_id
+            LIMIT :limit
+            OFFSET :offset;
+        `
+        const all_departments = await sequelize.query( query, {
+            replacements: { limit, offset },
+            type: sequelize.QueryTypes.SELECT,
         });
         if(all_departments.length === 0){ const error = new Error("No departments found");
             error.status = 404; throw error;}
