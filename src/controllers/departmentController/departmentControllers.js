@@ -1,3 +1,4 @@
+const departmentServices = require("../../services/departmentServices")
 const DepartmentService = require("../../services/departmentServices")
 
 const add_department = async function (req, res) {
@@ -39,11 +40,19 @@ const get_department_details = async function (req, res) {
 
         const result = await DepartmentService.get_department_details(department_name)
 
-        res.status(200).send(result)
+        res.status(200).json(result)
 
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }
 }
-
-module.exports = { add_department, get_all_departments, get_department_details}
+const delete_department  = async function(req,res){
+    try {
+        const department_id = req.params.department_id
+        const result = await DepartmentServices.delete_department(department_id)
+        res.status(200).json(result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+module.exports = { add_department, get_all_departments, get_department_details,delete_department}
