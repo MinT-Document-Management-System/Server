@@ -1,42 +1,47 @@
 const Role = require("../models/roleModel")
 
 class RolesService{
-  
+
   // Create a new role
   async create_role(role_data) {
     const {role_name, role_description} = role_data
     if (!role_name || !role_description) {
-      return {"success":false, error: "Role name and description are required!"}
+      const error = new Error("Role name and description are required!");
+      error.status = 400;
+      throw error;
     }
-    try {
-      await Role.create({role_name, role_description})
-      return {"success":true, message: "Role has been added successfully"}
-    } catch (error) {
-      return {"success":false, error}
+    const createRole = await Role.create({role_name, role_description})
+    if (!createRole){
+      const error = new Error("The role couldn't be created");
+      error.status = 500;
+      throw error;
     }
+    return createRole;
   }
 
 
   //Get a specific role by id
   async get_role(role_id){
-    try {
-        const role = await Role.findByPk(role_id)
-        return {"success": true, role}
-    } catch (error) {
-        return {"success": false, error}
-    } 
-  }  
+    const role = await Role.findByPk(role_id)
+    if (!role){
+      const error = new Error("The role couldn't be found");
+      error.status = 404;
+      throw error;
+    }
+    return role;
+  }
 
 
   // Get all roles
   async get_all_roles(){
-    try {
-        const all_roles = await Role.findAll()
-        return {"success": true, all_roles}
-    } catch (error) {
-        return {"success": false, error}
+    const all_roles = await Role.findAll()
+    if (!all_roles){
+      const error = new Error("The roles couldn't be found");
+      error.status = 404;
+      throw error;
     }
-  } 
+    return all_roles;
+  }
 
 
   // Update an existing role
@@ -44,16 +49,23 @@ class RolesService{
       //Removing role_identifier id from update_data
       const {role_id, ...updateAttributes} = update_data
       if (Object.keys(updateAttributes).length === 0) {
-          return {"success": false, "error":'No valid attributes provided for update'}
+        const error = new Error("No valid attributes provided for update");
+        error.status = 409;
+        throw error;
         }
-
-      try {
-          await role.update(updateAttributes, {where: {role_id}})
-          await this.role_row_updated(role_id)
-          return { "success": true, message: 'Role data updated successfully' };
-      } catch (error) {
-          return {"success": false, error}
+      const updateRole = await role.update(updateAttributes, {where: {role_id}})
+      if (!updateRole){
+        const error = new Error("The role couldn't be updated");
+        error.status = 500;
+        throw error;
       }
+      const role_updated = await this.role_row_updated(role_id)
+      if (!role_updated){
+        const error = new Error("The role couldn't be updated");
+        error.status = 500;
+        throw error;
+      }
+      return role_updated
   }
 
 
@@ -62,20 +74,26 @@ class RolesService{
     updated_role = await Role.findByPk(role_id)
     if (updated_role) {
         updated_role.updated_at = new Date()
-        await updated_role.save() 
+        await updated_role.save()
     }
   }
 
 
   // Delete a role
   async delete_role(role_id){
-    try {
-        const role = await Role.findByPk(role_id)
-        await role.destroy()
-        return {"success": true, message:"Role has been deleted successully."}
-    } catch (error) {
-
+    const role = await Role.findByPk(role_id)
+    if (!role){
+      const error = new Error("The role couldn't be found");
+      error.status = 404;
+      throw error;
     }
+    const deleteRole = await role.destroy()
+    if (!deleteRole){
+      const error = new Error("The role couldn't be delete");
+      error.status = 500;
+      throw error;
+    }
+    return deleteRole
   }
 }
 
