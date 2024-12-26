@@ -138,8 +138,8 @@ class UserService {
 
 
 
-    async get_user_data(email) {
-        const user = await User.findOne({where: {email}})
+    async get_user_data(user_id) {
+        const user = await User.findOne({where: {user_id}})
         if (!user) {
             const error = new Error("User can not be found");
             error.status = 404; throw error;
@@ -158,10 +158,24 @@ class UserService {
                 error.status = 409; throw error;
             }
             const userData = {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, role_name, department_name}
-            return {userData}
+            return userData
         }
     }
 
+
+
+    async get_all_users() {
+
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.page_size) || 10;
+
+        const offset = (page - 1) * pageSize;
+        const limit = pageSize;
+        
+        const all_users = await User.findAll();
+        if (all_users.length === 0) { const error = new Error("No users found.");
+            error.status(404); throw error;}
+    }
 
 
     async update_user_data(update_data) {
