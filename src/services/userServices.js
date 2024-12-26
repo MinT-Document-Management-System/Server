@@ -145,12 +145,13 @@ class UserService {
             error.status = 404; throw error;
         }
         else {
+            const role_name = "Could not be fetched"
+            const department_name = "Could not be fetched"
             try {
-                const role_name = (await Role.findOne({where: {role_id}})).role_name
-                const department_name = (await Department.findOne({where: {department_id}})).department_name
-            } catch {
-                const role_name = "Could not be fetched"
-                const department_name = "Could not be fetched"
+                role_name = await Role.findOne({where: {role_id}}).role_name
+                department_name = (await Department.findOne({where: {department_id}})).department_name
+            } catch (error) {
+                // Nothing here
             }
             const {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, is_pass_temp} = user
             if(is_pass_temp) {
