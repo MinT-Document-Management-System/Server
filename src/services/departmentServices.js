@@ -32,8 +32,8 @@ class DepartmentService {
     d.department_id,
     d.department_name,
     d.department_description,
-    created_at,
-    updated_at,
+    d.created_at,
+    d.updated_at,
     u.full_name AS department_head_name
 FROM
     department AS d
