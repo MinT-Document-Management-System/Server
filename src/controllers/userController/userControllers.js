@@ -44,7 +44,7 @@ const reset_password = async function (req, res) {
 const username_checker = async function (req, res) {
     try {
         const username = req.params.username;
-        const username_check = await UserService.username_check(username)
+        const username_check = await Userservice.username_check(username)
         res.status(200).json({message: "username is not taken"})
     } catch (error) {
         res.status(error.status || 400).json({error: error.message})
@@ -54,7 +54,7 @@ const username_checker = async function (req, res) {
 const get_user_data = async function (req, res) {
     try {
         const user_id = req.params.user_id;
-        const result = await UserService.get_user_data(user_id)
+        const result = await Userservice.get_user_data(user_id)
         res.status(200).json(result)
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
@@ -63,7 +63,11 @@ const get_user_data = async function (req, res) {
 
 const get_all_users = async function (req, res) {
     try {
-        const result = await UserService.get_all_users();
+        
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.page_size) || 10;
+
+        const result = await Userservice.get_all_users(page, pageSize);
         res.status(200).json(result);
 
     } catch (error) {

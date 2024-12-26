@@ -164,17 +164,20 @@ class UserService {
 
 
 
-    async get_all_users() {
-
-        const page = parseInt(req.query.page) || 1;
-        const pageSize = parseInt(req.query.page_size) || 10;
+    async get_all_users(page, pageSize) {
 
         const offset = (page - 1) * pageSize;
         const limit = pageSize;
-        
-        const all_users = await User.findAll();
-        if (all_users.length === 0) { const error = new Error("No users found.");
+
+        const { count, rows } = await User.findAndCountAll({
+            attributes: { exclude: ['password'] },
+            offset,
+            limit,
+          });
+        if (count === 0) { const error = new Error("No users found.");
             error.status(404); throw error;}
+
+        return {count, rows}
     }
 
 
