@@ -6,73 +6,81 @@ const Ingoing = require("../models//ingoingModel")
 const Outgoing = require("../models/outgoingModel")
 const uploadFileToCloudinary = require("./file-services/cloudinaryBufferUploader")
 const allowedExtensions = require("./file-services/allowedFileTypes")
+const { all } = require("../routes/roleRoutes")
 
 
 class LetterService {
-    
+
     async upload_letter_to_cloudinary(letter_file, metadata){
-        
-        try {
-            //Checking if file is uploaded
-            if (!letter_file) {
-                return {"status": false, "error": 'No file uploaded' };
-              }
-              
-            //Checking if file type is supported
-            const fileExtension = path.extname(letter_file.originalname).toLowerCase();
-            if (!allowedExtensions.includes(fileExtension)) {
-                return {"status": false, "error": `Unsupported file type: ${fileExtension}` };
-              }
-
-              //Uploading to cloudinary
-            const folder = "letters"
-            const result = await uploadFileToCloudinary(letter_file.buffer, folder)
-            
-            //Saving to file metadata and link to database
-            const file_path = result.secure_url 
-            const cloudinary_public_id = result.public_id 
-            const document_type = result.format
-
-            const file_name = letter_file.originalname
-            
-            const title = metadata.title || path.parse(letter_file.originalname).name;
-            const description = metadata.description || "No description"
-            const direction = metadata.direction || "In"
-            const new_letter = await Letter_Document.create({
-                title, description, file_name, file_path, cloudinary_public_id, document_type, direction
-            })
-
-            // Creating An Ingoing/Outgoing Row
-            if (direction === "In"){
-                //Create an ingoing letter here
-            } else {
-                //Create an outgoing letter here
-            }
-            
-            return {"success": true, "status":200, result }
-            
-        } catch (error) {
-            return {"success": false, error}
+        if (!letter_file){
+            const error = new Error("No file uploaded");
+            error.status = 400;
+            throw error;
         }
-        
+        const fileExtension = path.extname(letter_file.originalname).toLowerCase();
+        if (!allowedExtensions.includes(fileExtension)) {
+            const error = new Error(`Unsupported file type: ${fileExtension}`);
+            error.status = 400;
+            throw error;
+        }
+        const folder = "letters"
+        const result = await uploadFileToCloudinary(letter_file.buffer, folder)
+        if(!result){
+            const error = new Error("The file couldn't uploaded to cloud");
+            error.status = 500;
+            throw error;
+        }
+        //Saving to file metadata and link to database
+        const file_path = result.secure_url
+        const cloudinary_public_id = result.public_id
+        const document_type = result.format
+
+        const file_name = letter_file.originalname
+
+        const title = metadata.title || path.parse(letter_file.originalname).name;
+        const description = metadata.description || "No description"
+        const direction = metadata.direction || "In"
+        const new_letter = await Letter_Document.create({
+            title, description, file_name, file_path, cloudinary_public_id, document_type, direction
+        })
+        if (!new_letter){
+            const error = new Error("The letter couldn't be created");
+            error.status = 500;
+            throw error;
+        }
+
+        // Creating An Ingoing/Outgoing Row
+        if (direction === "In"){
+
+            //Create an ingoing letter here
+        } else {
+            //Create an outgoing letter here
+        }
+
+        return result
     }
-    
+
     async get_letter_from_cloudinary(public_id){
 
         //Sends a time limited private URL
-        try {
-            const letter_doc = await Letter_Document.findOne({where: {cloudinary_public_id: public_id}})
-            if (!letter_doc){
-                return {"success": false, "error": "Public ID of the document is invalid."}
-            }
-            const format = letter_doc.document_type
-            const privateUrl = cloudinary.utils.private_download_url(public_id, format);
-            return {"status": true, privateUrl}
-        } catch (error) {
-            return {"status": false, error}
+        const letter_doc = await Letter_Document.findOne({where: {cloudinary_public_id: public_id}})
+        if (!letter_doc){
+            const error = new Error("The letter couldn't be found");
+            error.status = 404;
+            throw error;
         }
-    
-    
+        const format = letter_doc.document_type
+        const privateUrl = cloudinary.utils.private_download_url(public_id, format);
+        return privateUrl
+    }
+    async get_all_letters(){
+        const all_letters = await Letter_Document.findAll()
+        if(!all_letters){
+            const error = new Error("The letters couldn't be found");
+            error.status = 404;
+            throw error;
+        }
+        return all_letters
     }
 }
 

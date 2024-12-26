@@ -26,8 +26,14 @@ const get_letter = async function (req, res) {
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }
-
+}
+const get_all_letters = async function (req,res){
+    try {
+        const all_letters = await LetterService.get_all_letters()
+        res.status(200).json(all_letters)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
 
 }
-
-module.exports = { upload_letter, get_letter }
+module.exports = { upload_letter, get_letter , get_all_letters}
