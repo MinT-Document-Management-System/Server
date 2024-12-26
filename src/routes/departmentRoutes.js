@@ -11,6 +11,6 @@ router.get("/get_all_departments/:page/:pageSize", get_all_departments)
 // Fetch Details of a Department Route
 router.get("/get_department_detail/:department_name", get_department_details)
 // Delete a department
-router.post("/delete_department",delete_department)
+router.post("/delete_department/:department_id",delete_department)
 
 module. exports = router;
