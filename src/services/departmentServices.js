@@ -1,3 +1,4 @@
+const sequelize = require("../config/db");
 const Department = require("../models/departmentModel")
 const User = require("../models/userModel")
 
@@ -27,18 +28,23 @@ class DepartmentService {
     async get_department_details(department_name){
         if(!department_name){const error = new Error("Department name is required");
             error.status = 400; throw error;}
-
-
-        const department = await Department.findOne({
-        where: { department_name },
-        include: [
-            {
-                model: User,
-                as: 'head', // Alias defined in the association
-                attributes: ['user_id', 'full_name'], // Fetch only necessary fields
-            },
-        ],
-    });
+        const query = `SELECT
+    d.department_id,
+    d.department_name,
+    d.department_description,
+    d.created_at,
+    d.updated_at,
+    u.full_name AS department_head_name
+FROM
+    department AS d
+LEFT JOIN
+    users AS u
+ON
+    d.department_head_id = u.user_id
+WHERE
+    d.department_name = department_name
+`
+        const department = await sequelize.query(query);
 
         if(!department){const error = new Error("Department can not be found");
             error.status = 404; throw error;}
