@@ -1,4 +1,5 @@
 const Department = require("../models/departmentModel")
+const User = require("../models/userModel")
 
 class DepartmentService {
     async create_department(department_data){
