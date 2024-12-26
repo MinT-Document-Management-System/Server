@@ -1,6 +1,6 @@
 const express = require("express")
 const { add_department, get_all_departments, get_department_details , delete_department} = require("../controllers/departmentController/departmentControllers")
-const { delete_department } = require("../services/departmentServices")
+
 
 const router = express.Router()
 
