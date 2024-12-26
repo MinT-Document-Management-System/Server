@@ -12,43 +12,47 @@ class UserService {
     async createUser(userdata){
         // Destructuring the received data
         const {username, full_name, email, phone_number, role_name, department_name} = userdata
-        if(!username) {return {"success": false, "error": "Username is required"}}
-        if(!full_name) {return {"success": false, "error": "Full name is required"}}
-        if(!email) {return {"success": false, "error": "Email is required"}}
-        if(!role_name) {return {"success": false, "error": "Role is required"}}
-        if(!department_name) {return {"success": false, "error": "Department is required"}}
-        if(!phone_number) {return {"success": false, "error": "Phone number is required"}}
+        if(!username) {const error = new Error("Username is required");
+            error.status = 400; throw error;}
+        if(!full_name) {const error = new Error("Full name is required");
+            error.status = 400; throw error;}
+        if(!email) {const error = new Error("Email is required");
+            error.status = 400; throw error;}
+        if(!role_name) {const error = new Error("Role is required");
+            error.status = 400; throw error;}
+        if(!department_name) {const error = new Error("Department is required");
+            error.status = 400; throw error;}
+        if(!phone_number) {const error = new Error("Phone number is required");
+            error.status = 400; throw error;} 
 
         // Fetching role_id and department_id
         const role = await Role.findOne({where: {role_name: role_name}})
         if (!role){
-            return {"success": false, "error": "Role is not found in the database"}
+            const error = new Error("Role is not found in the database");
+            error.status = 404; throw error;
         }
         const department = await Department.findOne({where: {department_name: department_name}})
         if (!department){
-            return {"success": false, "error": "Department is not found in the database"}
+            const error = new Error("Department is not found in the database");
+            error.status = 404; throw error;
         }
 
         //Creating Temporary Password
         const password = await generate_temp_password(8)
 
         //Creating user
-        try {
-            const newUser = await User.create({
-                username, email, password, full_name, email, phone_number,
-                role_id: role.role_id,
-                department_id: department.department_id,
-                is_pass_temp: true })
-            const link = "http://localhost:3000/reset_password"
-            const emailService = await sendResetPasswordEmailService(email,link,password)
-            if (!emailService.success) { return {
-                "success":false, "error":emailService.error
-            }}
-            return {"status":200,"success": true}
+        const newUser = await User.create({
+            username, email, password, full_name, email, phone_number,
+            role_id: role.role_id,
+            department_id: department.department_id,
+            is_pass_temp: true })
+            
+        if (!newUser){
+            const error = new Error("User can not be created");
+            error.status = 500; throw error;}
+        const link = "http://localhost:3000/reset_password"
+        const emailService = await sendResetPasswordEmailService(email,link,password)
 
-        } catch (error) {
-            return {"success": false, "error": error}
-        }
     }
 
 
@@ -56,7 +60,8 @@ class UserService {
     async reset_password(userdata){
         const {email, old_password, new_password,confirm_password} = userdata
         if (new_password !== confirm_password){
-            return {"success":false, "error":"Password doesn't match"}
+            const error = new Error("Password does not match");
+            error.status = 400; throw error;
         }
         const user = await User.findOne({
             where: {
@@ -75,10 +80,11 @@ class UserService {
                 const username = user.username
                 const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
 
-                return {"success": true, "message": "Password has been changed successfully.", jwt_token}
+                return jwt_token
             }
             else {
-                return {"success": false, "error": "User does not exist"}
+                const error = new Error("User does not exist");
+                error.status = 404; throw error;
             }
     }
 
@@ -89,14 +95,15 @@ class UserService {
             where: {username}
         })
         if (!user){
-            return {"success": false, "error": "Username can not be found"}
+            const error = new Error("Username can not be found");
+            error.status = 404; throw error;
         }
         else {
             const user_id = user.user_id
             const full_name = user.full_name
             const email = user.email
             const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
-            return {"success": true, jwt_token}
+            return jwt_token
         }
     }
 
@@ -107,9 +114,14 @@ class UserService {
             where: {email}
         })
         if (!user){
-            return {"success": false, "error": "Email can not be found."}
+            const error = new Error("Email can not be found.");
+                error.status = 404; throw error;
         }
         else {
+            const is_pass_temp = user.is_pass_temp;
+            if (!is_pass_temp){
+                const error = new Error("Temporary password is not reset.");
+                error.status = 409; throw error;}
             const user_id = user.user_id
             const full_name = user.full_name
             const username = user.username
@@ -117,10 +129,10 @@ class UserService {
             const stored_password = user.password
             const is_valid = await bcrypt.compare(password, stored_password)
             if (!is_valid){
-                return {"success": false, "error": "Wrong password!"}
-            }
+                const error = new Error("Wrong password.");
+                error.status = 401; throw error;}
             const jwt_token = jwt.sign({user_id, full_name, email, username, role_id}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
-            return {"status":200,"success": true, jwt_token}
+            return jwt_token
         }
     }
 
@@ -129,7 +141,8 @@ class UserService {
     async get_user_data(email) {
         const user = await User.findOne({where: {email}})
         if (!user) {
-            return {"success": false, "error": "User can not be found"}
+            const error = new Error("User can not be found");
+            error.status = 404; throw error;
         }
         else {
             try {
@@ -141,10 +154,11 @@ class UserService {
             }
             const {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, is_pass_temp} = user
             if(is_pass_temp) {
-                return {"success": false, "error": "Temporary password is not reset."}
+                const error = new Error("Temporary password is not reset.")
+                error.status = 409; throw error;
             }
             const userData = {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, role_name, department_name}
-            return {"success": true, userData}
+            return {userData}
         }
     }
 
@@ -154,31 +168,25 @@ class UserService {
         //Removing user_identifier id from update_data
         const {user_id, ...updateAttributes} = update_data
         if (Object.keys(updateAttributes).length === 0) {
-            return {"success": false, "error":'No valid attributes provided for update'}
+            const error = new Error('No valid attributes provided for update');
+            error.status = 400; throw error;
           }
 
-        try {
-            await User.update(updateAttributes, {where: {user_id}})
-            await this.user_row_updated(user_id)
-            return { "success": true, message: 'User data updated successfully' };
-        } catch (error) {
-            return {"success": false, error}
-        }
+        await User.update(updateAttributes, {where: {user_id}})
+        await this.user_row_updated(user_id)
+        return { message: 'User data updated successfully' };
     }
 
 
 
     async delete_user(user_id){
         const user = await User.findByPk(user_id)
-        if (!user) return {"success": false, error: "User can not be found"}
-
-        try {
-            await user.destroy()
-            return {"success": true, message: "User has been deleted successfully"}
-        } catch (error) {
-            return {"success": false, error}
+        if (!user) {const error = new Error("User can not be found");
+            error.status = 404; throw error;
         }
 
+        const destroyed_user = await user.destroy()
+        return {message: "User has been deleted successfully"}
     }
 
 
