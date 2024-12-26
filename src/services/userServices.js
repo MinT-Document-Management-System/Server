@@ -119,7 +119,7 @@ class UserService {
         }
         else {
             const is_pass_temp = user.is_pass_temp;
-            if (!is_pass_temp){
+            if (is_pass_temp){
                 const error = new Error("Temporary password is not reset.");
                 error.status = 409; throw error;}
             const user_id = user.user_id
