@@ -29,6 +29,7 @@ const get_letter = async function (req, res) {
 }
 const get_all_letters = async function (req,res){
     try {
+        
         const all_letters = await LetterService.get_all_letters()
         res.status(200).json(all_letters)
     } catch (error) {

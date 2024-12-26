@@ -9,5 +9,7 @@ const router = express.Router()
 router.post("/upload_letter", upload.single('file'), upload_letter)
 // Get Letter route
 router.get("/get_letter/:public_id", get_letter)
-router.get("/get_all_letters",get_all_letters)
+// GEt all Letters
+router.get("/get_all_letters", get_all_letters)
+
 module.exports = router
