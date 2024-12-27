@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, signup, reset_password, username_checker, get_user_data, get_all_users } = require('../controllers/userController/userControllers');
+const { login, signup, reset_password, username_checker, get_user_data, get_all_users, delete_user } = require('../controllers/userController/userControllers');
 
 
 const router = express.Router();
@@ -16,5 +16,7 @@ router.get('/username_check/:username', username_checker)
 router.get('/get_user_data/:user_id', get_user_data)
 // Fetch all users
 router.get('/get_all_users', get_all_users)
+// Delete a user
+router.get('/delete_user/:user_id', delete_user)
 
 module.exports = router;
