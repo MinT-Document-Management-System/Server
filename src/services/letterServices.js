@@ -53,7 +53,8 @@ class LetterService {
         // Creating An Ingoing/Outgoing Row
         if (direction === "In"){
             //Create an ingoing letter here
-            const ingoing_letter = await IngoingServices.create_ingoing(metadata)
+            const document_id = new_letter.document_id
+            const ingoing_letter = await IngoingServices.create_ingoing(metadata, document_id)
         } else {
             //Create an outgoing letter here
         }
@@ -62,12 +63,9 @@ class LetterService {
         const document_id = new_letter.document_id
         let department_list = metadata.department_list
         department_list = JSON.parse(department_list.replace(/(\w+)/g, '"$1"'))
-        console.log(department_list)
-        console.log(document_id)
         async function processDocAccess(department) {
             let department_result = await DepartmentService.get_department_details(department)
-            const department_id = department_result[0][0].department_id
-            console.log("--", department, " ----------------", department_id, "------")
+            const department_id = department_result[0].department_id
             const new_doc_dep_access = await Document_Department_Access.create({
                 document_id, department_id
             })
