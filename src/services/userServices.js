@@ -170,6 +170,15 @@ class UserService {
 
 
 
+    
+    async get_recently_created_users(num_of_users) {
+        const users = await User.findAll({order: [['created_at', 'DESC']], limit: num_of_users});
+        return users
+    }
+
+
+
+
     async get_all_users(page, pageSize) {
 
         const offset = (page - 1) * pageSize;

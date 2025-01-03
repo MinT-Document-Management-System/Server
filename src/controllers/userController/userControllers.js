@@ -61,6 +61,16 @@ const get_user_data = async function (req, res) {
     }
 }
 
+const get_recently_created_users = async function (req, res) {
+    try {
+        const num_of_users = parseInt(req.query.number) || 5;
+        const recent_users = await Userservice.get_recently_created_users(num_of_users);
+        res.status(200).json({recent_users});
+    } catch (error) {
+        res.status(error.status || 400).json({error: error.message})
+    }
+}
+
 const get_all_users = async function (req, res) {
     try {
         
@@ -85,4 +95,4 @@ const delete_user = async function (req, res) {
     }
 }
 
-module.exports = { login, signup, reset_password, username_checker, get_user_data, get_all_users, delete_user }
+module.exports = { login, signup, reset_password, username_checker, get_user_data, get_all_users, get_recently_created_users, delete_user }
