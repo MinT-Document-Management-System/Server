@@ -23,7 +23,7 @@ class UserService {
         if(!department_name) {const error = new Error("Department is required");
             error.status = 400; throw error;}
         if(!phone_number) {const error = new Error("Phone number is required");
-            error.status = 400; throw error;} 
+            error.status = 400; throw error;}
 
         // Fetching role_id and department_id
         const role = await Role.findOne({where: {role_name: role_name}})
@@ -48,7 +48,7 @@ class UserService {
             role_id: role.role_id,
             department_id: department.department_id,
             is_pass_temp: true })
-            
+
         if (!newUser){
             const error = new Error("User can not be created");
             error.status = 500; throw error;}
@@ -134,7 +134,9 @@ class UserService {
             if (!is_valid){
                 const error = new Error("Wrong password.");
                 error.status = 401; throw error;}
-            const jwt_token = jwt.sign({user_id, full_name, email, username, role_id}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
+            const role = await Role.findOne({ role_id })
+            const role_name = role.role_name
+            const jwt_token = jwt.sign({user_id, full_name, email, username, role_id, role_name}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
             return {jwt_token}
         }
     }
