@@ -39,10 +39,12 @@ class UserService {
 
         //Creating Temporary Password
         const password = await generate_temp_password(8)
+        const hashed_temporary_password = await hash_password(password)
 
         //Creating user
         const newUser = await User.create({
-            username, email, password, full_name, email, phone_number,
+            username, email, full_name, email, phone_number,
+            password: hashed_temporary_password,
             role_id: role.role_id,
             department_id: department.department_id,
             is_pass_temp: true })
@@ -63,10 +65,11 @@ class UserService {
             const error = new Error("Password does not match");
             error.status = 400; throw error;
         }
+        const stored_password = await hash_password(old_password)
         const user = await User.findOne({
             where: {
                 email: email,
-                password: old_password,
+                password: stored_password,
                 is_pass_temp: true,
             }})
 

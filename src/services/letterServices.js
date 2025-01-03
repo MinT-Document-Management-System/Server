@@ -73,14 +73,18 @@ class LetterService {
         const privateUrl = cloudinary.utils.private_download_url(public_id, format);
         return privateUrl
     }
-    async get_all_letters(){
-        const all_letters = await Letter_Document.findAll()
-        if(!all_letters){
-            const error = new Error("The letters couldn't be found");
-            error.status = 404;
-            throw error;
-        }
-        return all_letters
+    async get_all_letters(page, page_size){
+        const offset = (page - 1) * page_size;
+        const limit = page_size;
+
+        const { count, rows } = await Letter_Document.findAndCountAll({
+            offset,
+            limit,
+          });
+        if (count === 0) { const error = new Error("No letter document found.");
+            error.status(404); throw error;}
+
+        return {count, rows}
     }
 }
 

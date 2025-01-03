@@ -75,4 +75,14 @@ const get_all_users = async function (req, res) {
     }
 }
 
-module.exports = { login, signup, reset_password, username_checker, get_user_data, get_all_users }
+const delete_user = async function (req, res) {
+    try {
+        const user_id = req.params.user_id;
+        const result = await User.delete_user(user_id);
+        res.status(204).json(result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})        
+    }
+}
+
+module.exports = { login, signup, reset_password, username_checker, get_user_data, get_all_users, delete_user }
