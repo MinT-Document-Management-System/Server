@@ -42,10 +42,13 @@ class DepartmentService {
         ON
             d.department_head_id = u.user_id
         WHERE
-            d.department_name = department_name
+            d.department_name = :department_name
 
         `
-        const department = await sequelize.query(query);
+        const department = await sequelize.query(query, {
+            replacements: { department_name },
+            type: sequelize.QueryTypes.SELECT,
+        });
 
         if(!department){const error = new Error("Department can not be found");
             error.status = 404; throw error;}
@@ -96,6 +99,41 @@ class DepartmentService {
         }
         return deleted_department
     }
+
+    async getUserCountByDepartment(department_name) {
+        try {
+            const query = `
+            SELECT
+                d.department_name,
+                COUNT(u.user_id) AS userCount
+            FROM
+                department AS d
+            LEFT JOIN
+                users AS u
+            ON
+                d.department_id = u.department_id
+            WHERE
+                d.department_name = :department_name
+            GROUP BY
+                d.department_id
+            `
+            const department = await sequelize.query(query,
+            {
+                replacements: { department_name },
+                type: sequelize.QueryTypes.SELECT,
+            })
+
+            if (!department) {
+                throw new Error('Department not found');
+            }
+
+            return department;
+        } catch (error) {
+            console.error('Error fetching user count:', error.message);
+            throw error;
+        }
+    };
+
 }
 
 

@@ -1,4 +1,3 @@
-const departmentServices = require("../../services/departmentServices")
 const DepartmentService = require("../../services/departmentServices")
 
 const add_department = async function (req, res) {
@@ -53,4 +52,13 @@ const delete_department  = async function(req,res){
         res.status(error.status || 500).json({error: error.message})
     }
 }
-module.exports = { add_department, get_all_departments, get_department_details,delete_department}
+const get_user_count_by_department = async function(req,res){
+    try {
+        const department_name = req.params.department_name
+        const result = await DepartmentService.getUserCountByDepartment(department_name)
+        res.status(200).json(result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+module.exports = { add_department, get_all_departments, get_department_details,delete_department,get_user_count_by_department}
