@@ -18,8 +18,6 @@ const add_department = async function (req, res) {
 const get_all_departments = async function (req, res) {
     try {
         const {page, pageSize} = req.params;
-        const pageNumber = parseInt(page, 10) || 1; // Default to page 1 if invalid
-        const size = parseInt(pageSize, 10) || 10;
         const result = await DepartmentService.get_all_departments(page,pageSize)
 
         res.status(200).json(result)
@@ -49,8 +47,8 @@ const get_department_details = async function (req, res) {
 const delete_department  = async function(req,res){
     try {
         const department_id = req.params.department_id
-        const result = await DepartmentServices.delete_department(department_id)
-        res.status(200).json(result)
+        const result = await DepartmentService.delete_department(department_id)
+        res.status(204).json(result)
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }
