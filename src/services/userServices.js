@@ -83,7 +83,7 @@ class UserService {
                 const username = user.username
                 const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
 
-                return jwt_token
+                return {jwt_token}
             }
             else {
                 const error = new Error("User does not exist");
@@ -135,7 +135,7 @@ class UserService {
                 const error = new Error("Wrong password.");
                 error.status = 401; throw error;}
             const jwt_token = jwt.sign({user_id, full_name, email, username, role_id}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
-            return jwt_token
+            return {jwt_token}
         }
     }
 
