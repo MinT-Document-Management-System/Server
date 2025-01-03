@@ -4,6 +4,8 @@ const cloudinary = require("../config/cloudinaryConfig")
 const Letter_Document = require("../models/letterDocumentModel")
 const Ingoing = require("../models//ingoingModel")
 const Outgoing = require("../models/outgoingModel")
+const DepartmentService = require("../services/departmentServices")
+const Document_Department_Access = require("../models/docDepAccessModel")
 const uploadFileToCloudinary = require("./file-services/cloudinaryBufferUploader")
 const allowedExtensions = require("./file-services/allowedFileTypes")
 const { all } = require("../routes/roleRoutes")
@@ -55,6 +57,25 @@ class LetterService {
             //Create an ingoing letter here
         } else {
             //Create an outgoing letter here
+        }
+
+        // Document Department Access
+        const document_id = new_letter.document_id
+        let department_list = metadata.department_list
+        department_list = JSON.parse(department_list.replace(/(\w+)/g, '"$1"'))
+        console.log(department_list)
+        console.log(document_id)
+        async function processDocAccess(department) {
+            let department_result = await DepartmentService.get_department_details(department)
+            const department_id = department_result[0][0].department_id
+            console.log("--", department, " ----------------", department_id, "------")
+            const new_doc_dep_access = await Document_Department_Access.create({
+                document_id, department_id
+            })
+        }
+        for (let i = 0;  i < department_list.length; i++) {
+            await processDocAccess(department_list[i])
+
         }
 
         return result
