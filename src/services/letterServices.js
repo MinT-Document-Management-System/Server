@@ -2,11 +2,10 @@ require("dotenv").config()
 const path = require("path")
 const cloudinary = require("../config/cloudinaryConfig")
 const Letter_Document = require("../models/letterDocumentModel")
-const Ingoing = require("../models//ingoingModel")
-const Outgoing = require("../models/outgoingModel")
 const uploadFileToCloudinary = require("./file-services/cloudinaryBufferUploader")
 const allowedExtensions = require("./file-services/allowedFileTypes")
-const { all } = require("../routes/roleRoutes")
+const IngoingServices = require("./ingoingServices")
+const OutgoingServices = require('./outgoingServices')
 
 
 class LetterService {
@@ -51,10 +50,11 @@ class LetterService {
 
         // Creating An Ingoing/Outgoing Row
         if (direction === "In"){
-
             //Create an ingoing letter here
+            const ingoing_letter = await IngoingServices.create_ingoing(metadata)
         } else {
             //Create an outgoing letter here
+            const outgoing_letter = await OutgoingServices.create_outgoing(metadata);
         }
 
         return result
