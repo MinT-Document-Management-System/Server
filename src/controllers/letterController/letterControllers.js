@@ -39,4 +39,30 @@ const get_all_letters = async function (req,res){
     }
 
 }
-module.exports = { upload_letter, get_letter , get_all_letters}
+
+const grant_access = async function (req, res){
+    try {
+        const user_id = req.body.user_id
+        const letter_id = req.body.letter_id
+
+        const grant_result = await LetterService.grant_access(user_id, letter_id)
+
+        res.status(200).json(grant_result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+
+const revoke_access = async function (req, res) {
+    try {
+        const user_id = req.body.user_id
+        const letter_id = req.body.letter_id
+
+        const revoke_result = await LetterService.revoke_access(user_id, letter_id)
+
+        res.status(200).json(revoke_result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+module.exports = { upload_letter, get_letter, get_all_letters, grant_access, revoke_access}

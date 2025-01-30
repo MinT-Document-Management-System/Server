@@ -91,6 +91,7 @@ class LetterService {
         const privateUrl = cloudinary.utils.private_download_url(public_id, format);
         return privateUrl
     }
+
     async get_all_letters(page, page_size){
         const offset = (page - 1) * page_size;
         const limit = page_size;
@@ -103,6 +104,14 @@ class LetterService {
             error.status(404); throw error;}
 
         return {count, rows}
+    }
+
+    async grant_access(user_id, letter_id) {
+        // TODO
+    } 
+
+    async revoke_access(user_id, letter_id) {
+        // TODO
     }
 }
 
