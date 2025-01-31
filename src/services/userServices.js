@@ -52,7 +52,7 @@ class UserService {
         if (!newUser){
             const error = new Error("User can not be created");
             error.status = 500; throw error;}
-        const link = "http://localhost:3000/reset_password"
+        const link = "http://localhost:5173/reset_password"
         const emailService = await sendResetPasswordEmailService(email,link,password)
 
     }
