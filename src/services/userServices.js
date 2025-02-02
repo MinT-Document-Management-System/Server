@@ -6,6 +6,7 @@ const Department = require("../models/departmentModel")
 const User = require("../models/userModel")
 const { generate_temp_password, hash_password } = require("./password-service/passwordGenerator")
 const sendResetPasswordEmailService = require("./emailService")
+const redis = require('./redisService')
 
 class UserService {
 
@@ -52,7 +53,7 @@ class UserService {
         if (!newUser){
             const error = new Error("User can not be created");
             error.status = 500; throw error;}
-        const link = "http://localhost:3000/reset_password"
+        const link = "http://localhost:5173/reset_password"
         const emailService = await sendResetPasswordEmailService(email,link,password)
 
     }
@@ -90,6 +91,77 @@ class UserService {
                 error.status = 404; throw error;
             }
     }
+
+    
+    
+    async check_user_email(user_email){
+        if(!user_email){ const error = new Error("Email is not provided");
+            error.status = 400; throw error;}
+        const users = await User.findAll({where: {email: user_email}})
+        if(users.length === 1){return }
+        else{const error = new Error("Email does not exist");
+            error.status = 404; throw error;
+        }
+    }
+
+
+
+    async forget_password_send_otp(user_email){
+        // Prevent OTP spam
+        const existingOtp = await redis.get(`otp:${user_email}`);
+        if (existingOtp) {
+            return res.status(429).json({ message: "An OTP was already sent. Try later." });
+        }
+
+
+        const otp = await generate_temp_password(8)
+        const otp_hashed = await hash_password(password)
+        const expiryTime = 10 * 60; // 10 minutes
+        await redis.set(`forget_password_otp:${user_email}`, otp_hashed, "EX", expiryTime);        
+
+        const link = "http://localhost:5173/reset_password"
+        const emailService = await sendResetPasswordEmailService(email, link, otp)
+    }
+
+
+
+    async forget_password(user_data){
+        const {email, otp, new_password,confirm_password} = user_data
+        if (new_password !== confirm_password){
+            const error = new Error("Password does not match");
+            error.status = 400; throw error;
+        }
+
+        const user_otp = await hash_password(otp)
+        const storedOtp = await redis.get(`forget_password_otp:${email}`);
+        if (!storedOtp) {
+            return res.status(400).json({ error: "OTP expired or invalid" });}
+        if (storedOtp !== user_otp) {
+            return res.status(400).json({ error: "Incorrect OTP" });}
+        await redis.del(`forget_password_otp:${email}`);
+
+        const user = await User.findOne({
+            where: {
+                email: email,
+            }})
+
+        if(user) {
+            user.password = await hash_password(new_password)
+            await user.save()
+
+            const user_id = user.user_id
+            const full_name = user.full_name
+            const username = user.username
+            const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
+
+            return {jwt_token}
+        }
+        else {
+            const error = new Error("User does not exist");
+            error.status = 404; throw error;
+        }
+    }
+
 
 
 //      TBD
@@ -220,6 +292,7 @@ class UserService {
         const destroyed_user = await user.destroy()
         return {message: "User has been deleted successfully"}
     }
+
 
 
     async username_check(username){

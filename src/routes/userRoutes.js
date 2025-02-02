@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, signup, reset_password, username_checker, get_user_data, get_all_users, delete_user, get_recently_created_users } = require('../controllers/userController/userControllers');
+const { login, signup, reset_password, check_user_email, forget_password_send_otp, forget_password, username_checker, get_user_data, get_all_users, delete_user, get_recently_created_users } = require('../controllers/userController/userControllers');
 
 
 const router = express.Router();
@@ -9,7 +9,13 @@ router.post('/login', login);
 // Signup route
 router.post('/signup', signup);
 // Reset password route
-router.post('/reset_password',reset_password)
+router.post('/reset_password', reset_password)
+// Check if user exists route
+router.post('/check_user_email/:user_email', check_user_email)
+// Forget Password Send OTP
+router.post('/forget_password_send_otp', forget_password_send_otp)
+// Forget password route
+router.post('/forget_password', forget_password)
 // Unused username checker Route
 router.get('/username_check/:username', username_checker)
 // Fetch a user

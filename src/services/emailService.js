@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 // Function to send a password reset email
 const sendPasswordResetEmail = async (recipientEmail, resetLink, temp_password) => {
   const sendEmail = await transporter.sendMail({
-      from: process.env.EMAIL_FROM, // e.g., "Your App Name <your-email@gmail.com>"
+      from: process.env.EMAIL_FROM,
       to: recipientEmail,
       subject: 'Password Reset Request',
       html: `

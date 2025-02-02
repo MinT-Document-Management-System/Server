@@ -41,6 +41,43 @@ const reset_password = async function (req, res) {
     }
 }
 
+const check_user_email = async function (req, res) {
+    try {
+        const user_email = req.params.user_email;
+
+        const email_check = await Userservice.check_user_email(user_email)
+
+        res.status(200).json({message: "This email exists. Password can be reset."})
+    } catch (error) {
+        res.status(error.status || 400).json({error: error.message})
+    }
+}
+
+const forget_password_send_otp = async function (req, res) {
+    try {
+        const {user_email} = req.body
+
+        const send_otp = await Userservice.forget_password_send_otp(user_email)
+
+        res.status(200).json({message: "OTP has been sent successfully to the email."})
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+
+const forget_password = async function (req, res) {
+    try {
+        const userdata = req.body
+    
+        const token = await Userservice.forget_password(userdata)
+    
+        res.status(200).json(token)
+
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+
 const username_checker = async function (req, res) {
     try {
         const username = req.params.username;
@@ -95,4 +132,4 @@ const delete_user = async function (req, res) {
     }
 }
 
-module.exports = { login, signup, reset_password, username_checker, get_user_data, get_all_users, get_recently_created_users, delete_user }
+module.exports = { login, signup, reset_password, check_user_email, forget_password_send_otp, forget_password, username_checker, get_user_data, get_all_users, get_recently_created_users, delete_user }
