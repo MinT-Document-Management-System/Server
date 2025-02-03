@@ -110,7 +110,8 @@ class UserService {
         // Prevent OTP spam
         const existingOtp = await redis.get(`forget_password_otp:${user_email}`);
         if (existingOtp) {
-            return res.status(429).json({ message: "An OTP was already sent. Try later." });
+            const error = new Error("An OTP was already sent. Try later.");
+            error.status = 429; throw error;
         }
 
 
