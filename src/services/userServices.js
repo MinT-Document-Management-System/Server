@@ -120,7 +120,7 @@ class UserService {
         await redis.set(`forget_password_otp:${user_email}`, otp_hashed, "EX", expiryTime);        
 
         const link = "http://localhost:5173/reset_password"
-        const emailService = await sendResetPasswordEmailService(email, link, otp)
+        const emailService = await sendResetPasswordEmailService(user_email, link, otp)
     }
 
 
