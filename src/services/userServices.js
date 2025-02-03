@@ -108,14 +108,14 @@ class UserService {
 
     async forget_password_send_otp(user_email){
         // Prevent OTP spam
-        const existingOtp = await redis.get(`otp:${user_email}`);
+        const existingOtp = await redis.get(`forget_password_otp:${user_email}`);
         if (existingOtp) {
             return res.status(429).json({ message: "An OTP was already sent. Try later." });
         }
 
 
         const otp = await generate_temp_password(8)
-        const otp_hashed = await hash_password(password)
+        const otp_hashed = await hash_password(otp)
         const expiryTime = 10 * 60; // 10 minutes
         await redis.set(`forget_password_otp:${user_email}`, otp_hashed, "EX", expiryTime);        
 
