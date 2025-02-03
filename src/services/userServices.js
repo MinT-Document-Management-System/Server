@@ -123,22 +123,28 @@ class UserService {
         const link = "http://localhost:5173/reset_password"
         const emailService = await sendResetPasswordEmailService(user_email, link, otp)
     }
-
-
-
+    
+    
+    
     async forget_password(user_data){
-        const {email, otp, new_password,confirm_password} = user_data
+        const {email, user_otp, new_password,confirm_password} = user_data
         if (new_password !== confirm_password){
             const error = new Error("Password does not match");
             error.status = 400; throw error;
         }
-
-        const user_otp = await hash_password(otp)
         const storedOtp = await redis.get(`forget_password_otp:${email}`);
         if (!storedOtp) {
-            return res.status(400).json({ error: "OTP expired or invalid" });}
-        if (storedOtp !== user_otp) {
-            return res.status(400).json({ error: "Incorrect OTP" });}
+            const error = new Error("OTP expired or invalid")
+            error.status = 400; throw error}
+        
+        // Throwing Errors in Asynchronous Callbacks: If an error is thrown inside the third parameter function of compare, it will crash your application because it won't be handled properly. This is because bcrypt.compare() is asynchronous, and errors thrown inside its callback are not propagated to the outer scope.
+        
+        const is_same = await bcrypt.compare(user_otp, storedOtp);
+        if(!is_same){
+            const error = new Error("Incorrect OTP") 
+            error.status = 400; throw error
+        }
+
         await redis.del(`forget_password_otp:${email}`);
 
         const user = await User.findOne({
