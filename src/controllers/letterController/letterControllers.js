@@ -27,6 +27,7 @@ const get_letter = async function (req, res) {
         res.status(error.status || 500).json({error: error.message})
     }
 }
+
 const get_all_letters = async function (req,res){
     try {
         const page = parseInt(req.query.page) || 1;
@@ -37,7 +38,17 @@ const get_all_letters = async function (req,res){
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
     }
+}
 
+const delete_letter = async function (req, res){
+    try {
+        const public_id = req.params.public_id
+
+        const result = await LetterService.delete_letter(public_id);
+        res.status(200).json({"message": "File deleted successfully!", result})
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
 }
 
 const grant_access = async function (req, res){
@@ -65,4 +76,4 @@ const revoke_access = async function (req, res) {
         res.status(error.status || 500).json({error: error.message})
     }
 }
-module.exports = { upload_letter, get_letter, get_all_letters, grant_access, revoke_access}
+module.exports = { upload_letter, get_letter, get_all_letters, delete_letter, grant_access, revoke_access}

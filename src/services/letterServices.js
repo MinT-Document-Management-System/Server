@@ -2,12 +2,15 @@ require("dotenv").config()
 const path = require("path")
 const cloudinary = require("../config/cloudinaryConfig")
 const Letter_Document = require("../models/letterDocumentModel")
+const Ingoing_Letter = require("../models/ingoingModel")
+const Outgoing_Letter = require("../models/outgoingModel")
 const DepartmentService = require("../services/departmentServices")
 const Document_Department_Access = require("../models/docDepAccessModel")
 const uploadFileToCloudinary = require("./file-services/cloudinaryBufferUploader")
 const allowedExtensions = require("./file-services/allowedFileTypes")
 const IngoingServices = require("./ingoingServices")
 const OutgoingServices = require('./outgoingServices')
+const delete_file_from_cloudinary = require('./file-services/delete_file')
 
 
 class LetterService {
@@ -104,6 +107,29 @@ class LetterService {
             error.status(404); throw error;}
 
         return {count, rows}
+    }
+
+    async delete_letter(public_id) {
+        try {
+            await delete_file_from_cloudinary(public_id)
+            const letter_doc = await Letter_Document.findOne({where: {cloudinary_public_id: public_id}})
+            if(!letter_doc) {const error = new Error("Letter could not be found.")
+                error.status = 404; throw error
+            }
+            if (letter_doc.direction === "In") {
+                await Ingoing_Letter.destroy({
+                    where: { document_id: letter_doc.document_id }})
+            } else if (letter_doc.direction === "Out") {
+                await Outgoing_Letter.destroy({
+                    where: { document_id: letter_doc.document_id }})
+            }
+            const result = await Letter_Document.destroy({
+                where: { cloudinary_public_id: public_id }});
+                
+            }
+        catch (error){
+            throw error
+        }
     }
 
     async grant_access(user_id, letter_id) {
