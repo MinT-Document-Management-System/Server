@@ -61,35 +61,42 @@ class UserService {
 
 
     async reset_password(userdata){
-        const {email, old_password, new_password,confirm_password} = userdata
+        const {email, old_password, new_password, confirm_password} = userdata
         if (new_password !== confirm_password){
-            const error = new Error("Password does not match");
+            const error = new Error("Confirm password does not match");
             error.status = 400; throw error;
         }
-        const stored_password = await hash_password(old_password)
+
         const user = await User.findOne({
             where: {
                 email: email,
-                password: stored_password,
                 is_pass_temp: true,
             }})
 
-            if(user) {
+        if(user) {
+            const is_same = await bcrypt.compare(old_password, user.password)
+            if(is_same){
                 user.password = await hash_password(new_password)
                 user.is_pass_temp=false
                 await user.save()
-
+    
                 const user_id = user.user_id
                 const full_name = user.full_name
                 const username = user.username
                 const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
-
+    
                 return {jwt_token}
             }
             else {
-                const error = new Error("User does not exist");
-                error.status = 404; throw error;
+                const error = new Error("Password is incorrect.")
+                error.status = 400; throw error
             }
+            
+        }
+        else {
+            const error = new Error("User does not exist");
+            error.status = 404; throw error;
+        }
     }
 
     
