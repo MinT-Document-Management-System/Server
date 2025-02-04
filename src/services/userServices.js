@@ -220,7 +220,7 @@ class UserService {
             if (!is_valid){
                 const error = new Error("Wrong password.");
                 error.status = 401; throw error;}
-            const role = await Role.findOne({ role_id })
+            const role = await Role.findOne({where: {role_id} })
             const role_name = role.role_name
             const jwt_token = jwt.sign({user_id, full_name, email, username, role_id, role_name}, process.env.JWT_SECRET_KEY, {"expiresIn": '1h'})
             return {jwt_token}
