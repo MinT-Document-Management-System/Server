@@ -1,5 +1,5 @@
 const express = require("express")
-const { upload_letter, get_letter, get_all_letters, delete_letter, grant_access, revoke_access} = require("../controllers/letterController/letterControllers")
+const { upload_letter, get_letter, get_all_letters, upload_letter_version, delete_letter, grant_access, revoke_access} = require("../controllers/letterController/letterControllers")
 const upload = require("../services/file-services/multerService.js")
 
 
@@ -13,6 +13,8 @@ router.get("/get_letter/:public_id", get_letter)
 router.get("/get_all_letters", get_all_letters)
 // Delete Letter route
 router.delete('/delete_letter/:public_id', delete_letter)
+// Upload new Version Route
+router.post("/upload_letter_version", upload.single('file'), upload_letter_version)
 // Grant access to Letter
 router.patch('/grant_access', grant_access)
 // Revoke access to Letter
