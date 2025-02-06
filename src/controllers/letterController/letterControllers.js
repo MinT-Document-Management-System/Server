@@ -40,6 +40,20 @@ const get_all_letters = async function (req,res){
     }
 }
 
+const upload_letter_version = async function (req, res) {
+    try {
+        const letter_file = req.file
+        const metadata =  req.body
+
+        // TODO
+        const result = await LetterService.upload_letter_to_cloudinary(letter_file, metadata)
+
+        res.status(201).json(result)
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})
+    }
+}
+
 const delete_letter = async function (req, res){
     try {
         const public_id = req.params.public_id
