@@ -90,4 +90,4 @@ const revoke_access = async function (req, res) {
         res.status(error.status || 500).json({error: error.message})
     }
 }
-module.exports = { upload_letter, get_letter, get_all_letters, delete_letter, grant_access, revoke_access}
+module.exports = { upload_letter, get_letter, get_all_letters, delete_letter, upload_letter_version, grant_access, revoke_access}
