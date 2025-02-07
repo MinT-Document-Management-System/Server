@@ -4,7 +4,7 @@ const add_department = async function (req, res) {
     try {
         const department_data = req.body
 
-        const newDepartment = await DepartmentService.createDeparment(department_data)
+        const newDepartment = await DepartmentService.create_department(department_data)
 
         res.status(201).json(newDepartment)
 
