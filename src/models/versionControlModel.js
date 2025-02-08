@@ -1,5 +1,7 @@
 const {DataTypes} = require("sequelize")
 const sequelize = require("../config/db")
+const Letter_Document = require('./letterDocumentModel')
+const User = require('./userModel')
 
 const Version_Control = sequelize.define("Version_Control", 
     {
@@ -11,7 +13,7 @@ const Version_Control = sequelize.define("Version_Control",
         document_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "Letter_Document",
+                model: Letter_Document,
                 key: "document_id"
             }
         },
@@ -22,7 +24,7 @@ const Version_Control = sequelize.define("Version_Control",
         created_by: {
             type: DataTypes.INTEGER,
             references: {
-                model: "User",
+                model: User,
                 key: "user_id"
             }
         },
@@ -39,6 +41,13 @@ const Version_Control = sequelize.define("Version_Control",
         timestamps: false
     }
 )
+
+// Defining Relationships
+Version_Control.belongsTo(Letter_Document, { foreignKey: 'document_id', onDelete: 'CASCADE' })
+Letter_Document.hasOne(Version_Control, { foreignKey: 'document_id' })
+
+Version_Control.belongsTo(User, { foreignKey: 'created_by', onDelete: 'SET NULL' })
+User.hasMany(Version_Control, { foreignKey: 'created_by' })
 
 // Version_Control.sync({alter: false})
 

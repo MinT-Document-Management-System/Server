@@ -1,5 +1,7 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require('../config/db')
+const Letter_Document = require('./letterDocumentModel.js')
+const Department = require('./departmentModel.js')
 
 const Document_Department_Access = sequelize.define("Document_Department_Access",
     {
@@ -11,14 +13,14 @@ const Document_Department_Access = sequelize.define("Document_Department_Access"
         document_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "Letter_Document",
+                model: Letter_Document,
                 key: 'letter_id'
             }
         },
         department_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "Department",
+                model: Department,
                 key: 'department_id'
             }
         },
@@ -36,6 +38,13 @@ const Document_Department_Access = sequelize.define("Document_Department_Access"
         tableName: 'document_department_access',
         timestamps: false
     })
+
+// Define Relationship
+Document_Department_Access.belongsTo(Letter_Document, { foreignKey: 'document_id' });
+Letter_Document.hasMany(Document_Department_Access, { foreignKey: 'document_id' });
+
+Document_Department_Access.belongsTo(Department, { foreignKey: 'department_id' });
+Department.hasMany(Document_Department_Access, { foreignKey: 'department_id' });
 
 // Document_Department_Access.sync({alter: false})
 

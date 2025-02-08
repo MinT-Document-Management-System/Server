@@ -1,5 +1,7 @@
 const {DataTypes} = require("sequelize")
 const sequelize = require("../config/db")
+const User = require('./userModel')
+const Department = require('./departmentModel')
 
 const User_Department = sequelize.define("User_Department", 
     {
@@ -7,7 +9,7 @@ const User_Department = sequelize.define("User_Department",
             type: DataTypes.INTEGER,
             primaryKey: true,
             references: {
-                model: "User",
+                model: User,
                 key: "user_id"
             }
         },
@@ -15,7 +17,7 @@ const User_Department = sequelize.define("User_Department",
             type: DataTypes.INTEGER,
             primaryKey: true,
             references: {
-                model: "Department",
+                model: Department,
                 key: "department_id"
             }
         },
@@ -34,6 +36,10 @@ const User_Department = sequelize.define("User_Department",
         timestamps: false
     }
 )
+
+// Defining Relationship
+User_Department.belongsTo(User, { foreignKey: 'user_id' });
+User_Department.belongsTo(Department, { foreignKey: 'department_id' });
 
 // User_Department.sync({alter: false})
 

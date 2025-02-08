@@ -1,5 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); 
+const Role = require('./roleModel');
+const Department = require('./departmentModel')
+const User_Department = require('./userDepartmentModel')
 
 const User = sequelize.define('User', {
   user_id: {
@@ -33,17 +36,10 @@ const User = sequelize.define('User', {
   role_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'Roles',
+      model: Role,
       key: 'role_id',
     },
     allowNull: true,
-  },
-  department_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'Department',
-      key: 'department_id',
-    }
   },
   account_status: {
     type: DataTypes.STRING(20),
@@ -65,6 +61,17 @@ const User = sequelize.define('User', {
   tableName: 'users',
   timestamps: false, // Sequelize's built-in timestamps is avoided
 });
+
+// Defining Relationships
+User.belongsToMany(Department, {
+  through: User_Department, 
+  foreignKey: 'user_id',
+  otherKey: 'department_id',
+  as: 'Departments'  // Alias for user's departments
+});
+
+User.belongsTo(Role, { foreignKey: 'role_id', onDelete: 'SET NULL' });
+Role.hasMany(User, { foreignKey: 'role_id' })
 
 // User.sync({alter: false}) 
 

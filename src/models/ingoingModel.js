@@ -1,5 +1,7 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require('../config/db')
+const Letter_Document = require('./letterDocumentModel')
+const Comment = require('./commentModel')
 
 const Ingoing = sequelize.define("Ingoing", 
     {
@@ -11,7 +13,7 @@ const Ingoing = sequelize.define("Ingoing",
         document_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "Letter_Document",
+                model: Letter_Document,
                 key: "document_id"
             }
         },
@@ -39,7 +41,7 @@ const Ingoing = sequelize.define("Ingoing",
         comment_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "Comment",
+                model: Comment,
                 key: "comment_id"
             }
         },
@@ -49,6 +51,13 @@ const Ingoing = sequelize.define("Ingoing",
         timestamps: false  
     }
 )
+
+// Defining Relationship
+Ingoing.belongsTo(Letter_Document, { foreignKey: 'document_id', onDelete: 'CASCADE' });
+Letter_Document.hasOne(Ingoing, { foreignKey: 'document_id' });
+
+Ingoing.hasMany(Comment, { foreignKey: 'comment_id' });
+Comment.belongsTo(Ingoing, { foreignKey: 'comment_id',  onDelete: 'CASCADE' });
 
 // Ingoing.sync({alter: false})
 

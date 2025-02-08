@@ -1,5 +1,7 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require("../confif/db")
+const Notification = require('./notificationModel')
+const User = require('./userModel')
 
 const Message = sequelize.define("Message", 
     {
@@ -11,21 +13,21 @@ const Message = sequelize.define("Message",
         notification_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "Notification",
+                model: Notification,
                 key: "notification_id"
             }
         },
         sender_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "User",
+                model: User,
                 key: 'user_id'
             }
         },
         receiver_id: {
             type: DataTypes.INTEGER,
             references: {
-                model: "User",
+                model: User,
                 key: 'user_id'
             }
         },
@@ -54,6 +56,17 @@ const Message = sequelize.define("Message",
         timestamps: false
     })
 
-    // Message.sync({alter: false})
+// Define Relationship
+Message.belongsTo(Notification, { foreignKey: 'notification_id', onDelete: 'SET NULL' });
+Notification.hasOne(Message, { foreignKey: 'notification_id' });
 
-    module.exports = Message
+// Define Self-referencing Relationships
+Message.belongsTo(User, { foreignKey: 'sender_id', as: 'Sender', onDelete: 'SET NULL' });
+Message.belongsTo(User, { foreignKey: 'receiver_id', as: 'Receiver', onDelete: 'SET NULL' });
+
+User.hasMany(Message, { foreignKey: 'sender_id', as: 'SentMessages' });
+User.hasMany(Message, { foreignKey: 'receiver_id', as: 'ReceivedMessages' });
+    
+// Message.sync({alter: false})
+
+module.exports = Message

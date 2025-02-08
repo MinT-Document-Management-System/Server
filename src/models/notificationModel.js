@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize')
 const sequelize = require('../config/db')
+const User = require('./userModel')
 
 const Notification = sequelize.define('Notification', 
     {
@@ -12,7 +13,7 @@ const Notification = sequelize.define('Notification',
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: "User",
+                model: User,
                 key: "user_id"
             }
         },
@@ -20,7 +21,7 @@ const Notification = sequelize.define('Notification',
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: "User",
+                model: User,
                 key: "user_id"
             }
         },
@@ -38,6 +39,14 @@ const Notification = sequelize.define('Notification',
         tableName : 'notification',
         timestamps: false``
     })
+
+// Defining Self-referencing Relationships
+Notification.belongsTo(User, { foreignKey: 'sender_id', as: 'Sender', onDelete: 'SET NULL' });
+Notification.belongsTo(User, { foreignKey: 'receiver_id', as: 'Receiver', onDelete: 'SET NULL' });
+
+User.hasMany(Notification, { foreignKey: 'sender_id', as: 'SentMessages' });
+User.hasMany(Notification, { foreignKey: 'receiver_id', as: 'ReceivedMessages' });
+
 
 // Notification.sync({alter: false})
 
