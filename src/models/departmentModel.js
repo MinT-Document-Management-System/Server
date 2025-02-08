@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); 
 const User = require('./userModel')
-const User_Department = require('./userDepartmentModel')
 
 const Department = sequelize.define('Department', {
         department_id: {
@@ -43,13 +42,6 @@ const Department = sequelize.define('Department', {
 // Define Relationship
 Department.belongsTo(User, { foreignKey: 'department_head_id', as: 'DepartmentHead' });
 User.hasOne(Department, { foreignKey: 'department_head_id', as: 'ManagedDepartment' });
-
-Department.belongsToMany(User, {
-    through: User_Department, 
-    foreignKey: 'department_id',
-    otherKey: 'user_id',
-    as: 'Users'  // Alias for department's users
-});
 
 // Department.sync({alter: false})
 

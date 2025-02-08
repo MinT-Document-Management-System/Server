@@ -38,8 +38,22 @@ const User_Department = sequelize.define("User_Department",
 )
 
 // Defining Relationship
-User_Department.belongsTo(User, { foreignKey: 'user_id' });
-User_Department.belongsTo(Department, { foreignKey: 'department_id' });
+// User_Department.belongsTo(User, { foreignKey: 'user_id' });
+// User_Department.belongsTo(Department, { foreignKey: 'department_id' });
+
+User.belongsToMany(Department, {
+    through: User_Department, 
+    foreignKey: 'user_id',
+    otherKey: 'department_id',
+    as: 'Departments'  // Alias for user's departments
+  });
+
+Department.belongsToMany(User, {
+    through: User_Department, 
+    foreignKey: 'department_id',
+    otherKey: 'user_id',
+    as: 'Users'  // Alias for department's users
+});
 
 // User_Department.sync({alter: false})
 
