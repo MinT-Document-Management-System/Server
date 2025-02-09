@@ -1,5 +1,6 @@
 require("dotenv").config()
 const path = require("path")
+const { Op } = require('sequelize')
 const cloudinary = require("../config/cloudinaryConfig")
 const Letter_Document = require("../models/letterDocumentModel")
 const Ingoing_Letter = require("../models/ingoingModel")
