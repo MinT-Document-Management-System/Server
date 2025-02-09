@@ -112,12 +112,14 @@ class LetterService {
             },
             offset,
             limit,
+            order: [['created_at', 'DESC']]
           });
           
         if (count === 0) { const error = new Error("No letter document found.");
             error.status = 404; throw error;}
 
-        return {count, rows}
+        const unique_counts = rows.length     // One document may have more than one count, however the rows are still unique
+        return {count : unique_counts, rows}
     }
 
     async delete_letter(public_id) {

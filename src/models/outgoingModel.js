@@ -1,7 +1,7 @@
 const {DataTypes} = require("sequelize")
 const sequelize = require("../config/db")
 const Letter_Document = require('./letterDocumentModel')
-const Department = require('./departmentModel')
+const { Department } = require('./many_to_many_models/user_department_relation')
 const Comment = require('./commentModel')
 
 const Outgoing = sequelize.define("Outgoing", 

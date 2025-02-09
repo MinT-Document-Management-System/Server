@@ -39,10 +39,6 @@ const Department = sequelize.define('Department', {
     }
 )
 
-// Define Relationship
-Department.belongsTo(User, { foreignKey: 'department_head_id', as: 'DepartmentHead' });
-User.hasOne(Department, { foreignKey: 'department_head_id', as: 'ManagedDepartment' });
-
 // Department.sync({alter: false})
 
 module.exports = Department

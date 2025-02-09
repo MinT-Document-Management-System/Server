@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize')
 const sequelize = require('../config/db')
 const Letter_Document = require('./letterDocumentModel.js')
-const Department = require('./departmentModel.js')
+const { Department } = require('./many_to_many_models/user_department_relation')
 
 const Document_Department_Access = sequelize.define("Document_Department_Access",
     {

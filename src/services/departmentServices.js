@@ -1,6 +1,5 @@
 const sequelize = require("../config/db");
-const Department = require("../models/departmentModel")
-const User = require("../models/userModel")
+const { User, Department } = require("../models/many_to_many_models/user_department_relation")
 
 class DepartmentService {
     async create_department(department_data){
