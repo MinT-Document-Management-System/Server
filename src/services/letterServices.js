@@ -95,14 +95,24 @@ class LetterService {
         return privateUrl
     }
 
-    async get_all_letters(page, page_size){
+    async get_all_letters(user_id, page, page_size){
         const offset = (page - 1) * page_size;
         const limit = page_size;
 
         const { count, rows } = await Letter_Document.findAndCountAll({
+            include: {
+                model: Document_Department_Access,
+                required: true, // Ensures only matching letters are selected
+                where: {
+                    privileged_user_within_department: {
+                        [Op.contains]: [user_id] // Checks if user_id exists in privileged_user_within_department array
+                    }
+                }
+            },
             offset,
             limit,
           });
+          
         if (count === 0) { const error = new Error("No letter document found.");
             error.status(404); throw error;}
 
