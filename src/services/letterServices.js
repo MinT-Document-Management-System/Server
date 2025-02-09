@@ -102,15 +102,15 @@ class LetterService {
         let count, rows;
 
         if (role_name === "record_official" || role_name === "admin"){
-            count, rows  = await Letter_Document.findAndCountAll({
+            ({ count, rows }  = await Letter_Document.findAndCountAll({
                 offset,
                 limit,
                 order: [['created_at', 'DESC']]
-            })
+            }));
             
         }
         else if (role_name === "department_head" || role_name === "staff"){
-            count, rows = await Letter_Document.findAndCountAll({
+            ({ count, rows } = await Letter_Document.findAndCountAll({
                 include: {
                     model: Document_Department_Access,
                     required: true, // Ensures only matching letters are selected
@@ -123,7 +123,7 @@ class LetterService {
                 offset,
                 limit,
                 order: [['created_at', 'DESC']]
-              });
+              }));
         }
         else {
             const error = new Error("You have no acccess to any documents")
@@ -135,7 +135,7 @@ class LetterService {
             error.status = 404; throw error;}
 
         const unique_counts = rows.length     // One document may have more than one count, however the rows are still unique
-        return {count : unique_counts, rows}
+        return { count: unique_counts, rows }
     }
 
     async delete_letter(public_id) {
