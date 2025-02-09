@@ -115,7 +115,7 @@ class LetterService {
           });
           
         if (count === 0) { const error = new Error("No letter document found.");
-            error.status(404); throw error;}
+            error.status = 404; throw error;}
 
         return {count, rows}
     }
