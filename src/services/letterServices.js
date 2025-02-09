@@ -31,7 +31,7 @@ class LetterService {
         const folder = "letters"
         const result = await uploadFileToCloudinary(letter_file.buffer, folder)
         if(!result){
-            const error = new Error("The file couldn't uploaded to cloud");
+            const error = new Error("The file couldn't be uploaded to cloud");
             error.status = 500;
             throw error;
         }
@@ -96,24 +96,40 @@ class LetterService {
         return privateUrl
     }
 
-    async get_all_letters(user_id, page, page_size){
+    async get_all_letters(user_id, role_name, departments, page, page_size){
         const offset = (page - 1) * page_size;
         const limit = page_size;
+        let count, rows;
 
-        const { count, rows } = await Letter_Document.findAndCountAll({
-            include: {
-                model: Document_Department_Access,
-                required: true, // Ensures only matching letters are selected
-                where: {
-                    privileged_user_within_department: {
-                        [Op.contains]: [user_id] // Checks if user_id exists in privileged_user_within_department array
+        if (role_name === "record_official" || role_name === "admin"){
+            count, rows  = await Letter_Document.findAndCountAll({
+                offset,
+                limit,
+                order: [['created_at', 'DESC']]
+            })
+            
+        }
+        else if (role_name === "department_head" || role_name === "staff"){
+            count, rows = await Letter_Document.findAndCountAll({
+                include: {
+                    model: Document_Department_Access,
+                    required: true, // Ensures only matching letters are selected
+                    where: {
+                        privileged_user_within_department: {
+                            [Op.contains]: [user_id] // Checks if user_id exists in privileged_user_within_department array
+                        }
                     }
-                }
-            },
-            offset,
-            limit,
-            order: [['created_at', 'DESC']]
-          });
+                },
+                offset,
+                limit,
+                order: [['created_at', 'DESC']]
+              });
+        }
+        else {
+            const error = new Error("You have no acccess to any documents")
+            error.status = 403; throw error 
+        }
+
           
         if (count === 0) { const error = new Error("No letter document found.");
             error.status = 404; throw error;}

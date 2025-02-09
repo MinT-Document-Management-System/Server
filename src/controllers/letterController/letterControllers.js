@@ -33,8 +33,10 @@ const get_all_letters = async function (req,res){
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.page_size) || 10;
         const user_id = req.user.user_id
+        const role_name = req.user.role_name
+        const departments = req.user.departments
 
-        const all_letters = await LetterService.get_all_letters(user_id, page, pageSize);
+        const all_letters = await LetterService.get_all_letters(user_id, role_name, departments, page, pageSize);
         res.status(200).json(all_letters)
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})
