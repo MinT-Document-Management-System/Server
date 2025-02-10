@@ -27,62 +27,74 @@ class DepartmentService {
     async get_department_details(department_name){
         if(!department_name){const error = new Error("Department name is required");
             error.status = 400; throw error;}
-        const query = `SELECT
-        d.department_id,
-        d.department_name,
-        d.department_description,
-        d.created_at,
-        d.updated_at,
-        u.full_name AS department_head_name
-        FROM
-            department AS d
-        LEFT JOIN
-            users AS u
-        ON
-            d.department_head_id = u.user_id
-        WHERE
-            d.department_name = :department_name
 
-        `
-        const department = await sequelize.query(query, {
-            replacements: { department_name },
-            type: sequelize.QueryTypes.SELECT,
+        let department = await Department.findOne({
+            where: { department_name: department_name }, // Filtering by department_name
+            attributes: [
+                'department_id',
+                'department_name',
+                'department_description',
+                'created_at',
+                'updated_at'
+            ],
+            include: [
+                {
+                    model: User,
+                    as: 'DepartmentHead', // This alias should match your association
+                    attributes: ['full_name']
+                }
+            ],
+            raw: true, // Flatten results into a plain object
+            nest: true // Ensures nested objects remain structured
         });
 
+        department.department_head_name = department.DepartmentHead.full_name
+        delete department.DepartmentHead
+        
         if(!department){const error = new Error("Department can not be found");
             error.status = 404; throw error;}
-        return department;
+        return [department];
     }
 
-    async get_all_departments(page,pageSize){
+    async get_all_departments(page, pageSize){
         const offset = (page - 1) * pageSize;
         const limit = pageSize;
-        const query = `SELECT
-        d.department_id,
-        d.department_name,
-        d.department_description,
-        d.created_at,
-        d.updated_at,
-        u.full_name AS department_head_name
-        FROM
-            department AS d
-        LEFT JOIN
-            users AS u
-        ON
-            d.department_head_id = u.user_id
-         ORDER BY
-                d.department_id
-            LIMIT :limit
-            OFFSET :offset;
-        `
-        const all_departments = await sequelize.query( query, {
-            replacements: { limit, offset },
-            type: sequelize.QueryTypes.SELECT,
+
+        let all_departments = await Department.findAll({
+            attributes: [
+                'department_id',
+                'department_name',
+                'department_description',
+                'created_at',
+                'updated_at'
+            ],
+            include: [
+                {
+                    model: User,
+                    as: 'DepartmentHead',
+                    attributes: ['full_name']
+                }
+            ],
+            order: [['department_id', 'ASC']], 
+            limit: limit,
+            offset: offset,
+            raw: true, // Flatten results into plain objects
+            nest: true // Keep nested structures intact
         });
+        
+
         if(all_departments.length === 0){ const error = new Error("No departments found");
             error.status = 404; throw error;}
+
+        all_departments = all_departments.map((department) => {
+            department.department_head_name = department.DepartmentHead.full_name
+            delete department.DepartmentHead
+            return department
+        })
+
         return all_departments
     }
+
     async delete_department(department_id){
         const department = await Department.findByPk(department_id)
         if(!department){
@@ -101,34 +113,35 @@ class DepartmentService {
 
     async getUserCountByDepartment(department_name) {
         try {
-            const query = `
-            SELECT
-                d.department_name,
-                COUNT(u.user_id) AS userCount
-            FROM
-                department AS d
-            LEFT JOIN
-                users AS u
-            ON
-                d.department_id = u.department_id
-            WHERE
-                d.department_name = :department_name
-            GROUP BY
-                d.department_id
-            `
-            const department = await sequelize.query(query,
-            {
-                replacements: { department_name },
-                type: sequelize.QueryTypes.SELECT,
-            })
+
+            const department = await Department.findOne({
+                where: { department_name: department_name },
+                attributes: [
+                    'department_name',
+                    [sequelize.fn('COUNT', sequelize.col('Users.user_id')), 'userCount'] // Counting users
+                ],
+                include: [
+                    {
+                        model: User,
+                        as: 'Users',  // Alias for the many-to-many relation
+                        through: {
+                            attributes: []  // Exclude fields from join table
+                        },
+                        attributes: []  // Exclude user details, just counting
+                    }
+                ],
+                group: ['Department.department_name'],  // Ensures count is accurate
+                raw: true  // Returns plain JSON result
+            });            
 
             if (!department) {
                 throw new Error('Department not found');
             }
 
-            return department;
-        } catch (error) {
-            console.error('Error fetching user count:', error.message);
+            return [department];
+            
+        } catch (err) {
+            const error = new Error('Error fetching user count:', err.message);
             throw error;
         }
     };
