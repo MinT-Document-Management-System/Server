@@ -23,9 +23,13 @@ const Outgoing = sequelize.define("Outgoing",
         },
         date_written: {
             type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
+            allowNull: true,
         },
         date_sent: {
             type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
+            allowNull: true,
         },
         sender_department_id: {
             type: DataTypes.INTEGER,
@@ -34,13 +38,6 @@ const Outgoing = sequelize.define("Outgoing",
                 key: "department_id"
             }
         },
-        comment_id: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: Comment,
-                key: "comment_id"
-            }
-        }
     }, 
     {
         tableName: 'outgoing',
@@ -54,9 +51,6 @@ Letter_Document.hasOne(Outgoing, { foreignKey: 'document_id' });
 
 Outgoing.belongsTo(Department, { foreignKey: 'sender_department_id', onDelete: 'SET NULL' });
 Department.hasOne(Outgoing, { foreignKey: 'sender_department_id' });
-
-Outgoing.hasMany(Comment, { foreignKey: 'comment_id' });
-Comment.belongsTo(Outgoing, { foreignKey: 'comment_id', onDelete: 'CASCADE' });
 
 // Outgoing.sync({alter: false})
 
