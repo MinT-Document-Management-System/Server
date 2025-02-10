@@ -39,6 +39,13 @@ const User = sequelize.define('User', {
     },
     allowNull: true,
   },
+  department_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'Department',
+      key: 'department_id',
+    }
+  },
   account_status: {
     type: DataTypes.STRING(20),
     defaultValue: 'Active',

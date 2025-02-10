@@ -128,7 +128,7 @@ const get_all_users = async function (req, res) {
 const delete_user = async function (req, res) {
     try {
         const user_id = req.params.user_id;
-        const result = await User.delete_user(user_id);
+        const result = await Userservice.delete_user(user_id);
         res.status(204).json(result)
     } catch (error) {
         res.status(error.status || 500).json({error: error.message})        

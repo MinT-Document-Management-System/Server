@@ -12,14 +12,18 @@ User.belongsToMany(Department, {
     through: User_Department, 
     foreignKey: 'user_id',
     otherKey: 'department_id',
-    as: 'Departments'  // Alias for user's departments
+    as: 'Departments',  // Alias for user's departments
+    onDelete: 'CASCADE',  // Ensures related User_Department rows are deleted
+    hooks: true
 });
 
 Department.belongsToMany(User, {
     through: User_Department, 
     foreignKey: 'department_id',
     otherKey: 'user_id',
-    as: 'Users'  // Alias for department's users
+    as: 'Users',  // Alias for department's users
+    onDelete: 'CASCADE',
+    hooks: true
 });
 
 module.exports = { User, Department, User_Department }

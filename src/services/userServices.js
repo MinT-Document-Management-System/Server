@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken")
 require("dotenv").config()
 const bcrypt = require("bcrypt")
 const Role = require("../models/roleModel")
-const { User, Department } = require("../models/many_to_many_models/user_department_relation")
+const { User, Department, User_Department } = require("../models/many_to_many_models/user_department_relation")
 const { generate_temp_password, hash_password } = require("./password-service/passwordGenerator")
 const sendResetPasswordEmailService = require("./emailService")
 const redis = require('./redisService')
@@ -52,6 +52,10 @@ class UserService {
         if (!newUser){
             const error = new Error("User can not be created");
             error.status = 500; throw error;}
+        const newUserDepartment = await User_Department.create({
+            user_id: newUser.user_id,
+            department_id: department.department_id 
+        })
         const link = "http://localhost:5173/reset_password"
         const emailService = await sendResetPasswordEmailService(email,link,password)
 
@@ -191,7 +195,7 @@ class UserService {
             const full_name = user.full_name
             const email = user.email
             const jwt_token = jwt.sign({user_id, full_name, email, username}, process.env.JWT_SECRET_KEY, {"expiresIn": '3d'})
-            return jwt_token
+            return { jwt_token }
         }
     }
 
@@ -229,30 +233,28 @@ class UserService {
 
 
     async get_user_data(user_id) {
-        const user = await User.findOne({where: {user_id}})
+
+        const user = await User.findOne({
+            where: { user_id },
+            include: [
+                { model: Role, attributes: ['role_name'] },
+                { model: Department, as: 'Departments', attributes: ['department_name'] }
+             ]
+          });
+          
         if (!user) {
             const error = new Error("User can not be found");
-            error.status = 404; throw error;
+            error.status = 404; throw error;        
         }
-        else {
-            const role_name = "Could not be fetched"
-            const department_name = "Could not be fetched"
-            try {
-                role_name = await Role.findOne({where: {role_id}}).role_name
-                department_name = (await Department.findOne({where: {department_id}})).department_name
-            } catch (error) {
-                // Nothing here
-            }
-            const {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, is_pass_temp} = user
-            if(is_pass_temp) {
-                const error = new Error("Temporary password is not reset.")
-                error.status = 409; throw error;
-            }
-            const userData = {user_id, username, email, full_name, phone_number, account_status, created_at, updated_at, role_name, department_name}
-            return userData
-        }
-    }
 
+        user.departments =  user.Departments.map(dept => dept.dataValues.department_name);
+        user.role_name   =  user.Role.dataValues.role_name;
+
+        const { username, email, full_name, phone_number, account_status, role_name, departments, created_at, updated_at, is_pass_temp} = user
+        const userData = {user_id, username, email, full_name, phone_number, role_name, departments, account_status, created_at, updated_at, is_pass_temp}
+            
+        return userData
+    }
 
 
     
@@ -260,7 +262,6 @@ class UserService {
         const users = await User.findAll({order: [['created_at', 'DESC']], limit: num_of_users});
         return users
     }
-
 
 
 
@@ -274,8 +275,9 @@ class UserService {
             offset,
             limit,
           });
+
         if (count === 0) { const error = new Error("No users found.");
-            error.status(404); throw error;}
+            error.status = 404; throw error;}
 
         return {count, rows}
     }
@@ -302,7 +304,13 @@ class UserService {
             error.status = 404; throw error;
         }
 
+        // Recommended Deletion: deleting associated User_Department records (Not explicitly necessary)
+        await User_Department.destroy({
+            where: { user_id }
+        });
+        
         const destroyed_user = await user.destroy()
+
         return {message: "User has been deleted successfully"}
     }
 
@@ -327,6 +335,8 @@ class UserService {
             await updated_user.save()
         }
     }
+
+    
 }
 
 module.exports = new UserService()
