@@ -293,7 +293,7 @@ class UserService {
 
         await User.update(updateAttributes, {where: {user_id}})
         await this.user_row_updated(user_id)
-        return { message: 'User data updated successfully' };
+        return { message: 'User data has been updated successfully' };
     }
 
 
