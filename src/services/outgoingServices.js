@@ -4,8 +4,8 @@ class OutgoingServices {
 
     async create_outgoing( metadata, document_id ){
         try {
-            const date_written = metadata.date_written || NULL;
-            const date_sent = metadata.date_sent || NULL;
+            const date_written = metadata.date_written || null;
+            const date_sent = metadata.date_sent || null;
 
             const receiver_body = metadata.receiver_body;
             const sender_department_id = metadata.sender_department_id;

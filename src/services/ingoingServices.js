@@ -7,8 +7,8 @@ class IngoingServices {
             const letter_id = metadata.letter_id || "TBC by Foreign Sender"
             const sender_body = metadata.sender_body || metadata.title;
 
-            const date_written = metadata.date_written || NULL
-            const date_forwarded = metadata.date_forwarded || NULL
+            const date_written = metadata.date_written || null
+            const date_forwarded = metadata.date_forwarded || null
             
             if( !document_id || !sender_body ) {
                 const error = new Error("Required fields are missing");
