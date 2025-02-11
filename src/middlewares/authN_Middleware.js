@@ -5,10 +5,11 @@ const Role = require('../models/roleModel')
 
 const authenticateJWT = async (req, res, next) => {
     // const token = req.header("Authorization")?.split(" ")[1]; // Extract token from Authorization header
-    const token = req.cookies.jwt_token
-    console.log("New request Cookie ---- ", req.cookies)
-    console.log(" Request --- ", req)
+    let token = req.cookies.jwt_token
 
+    if (!token) {
+        token = extractToken(req) 
+    }
     if (!token) {
         return res.status(401).json({ message: "Unauthorized. You must login first." });
     }
@@ -38,6 +39,17 @@ const authenticateJWT = async (req, res, next) => {
     } catch (err) {
         return res.status(403).json({ message: err.message });
     }
+};
+
+
+const extractToken = (req) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return null; // Return null if no token is found
+    }
+
+    return authHeader.split(' ')[1]; // Extract the token part
 };
 
 module.exports = authenticateJWT;
