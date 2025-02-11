@@ -6,6 +6,8 @@ const Role = require('../models/roleModel')
 const authenticateJWT = async (req, res, next) => {
     // const token = req.header("Authorization")?.split(" ")[1]; // Extract token from Authorization header
     const token = req.cookies.jwt_token
+    console.log("New request Cookie ---- ", req.cookies)
+    console.log(" Request --- ", req)
 
     if (!token) {
         return res.status(401).json({ message: "Unauthorized. You must login first." });
