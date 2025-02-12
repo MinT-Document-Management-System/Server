@@ -41,7 +41,7 @@ const Document_Department_Access = sequelize.define("Document_Department_Access"
 
 // Define Relationship
 Document_Department_Access.belongsTo(Letter_Document, { foreignKey: 'document_id' });
-Letter_Document.hasMany(Document_Department_Access, { foreignKey: 'document_id' });
+Letter_Document.hasMany(Document_Department_Access, { foreignKey: 'document_id', as: 'DocDepartmentAccess' });
 
 Document_Department_Access.belongsTo(Department, { foreignKey: 'department_id' });
 Department.hasMany(Document_Department_Access, { foreignKey: 'department_id' });

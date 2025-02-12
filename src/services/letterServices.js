@@ -102,10 +102,17 @@ class LetterService {
         let count, rows;
 
         if (role_name === "record_official" || role_name === "admin"){
-            ({ count, rows }  = await Letter_Document.findAndCountAll({
+            ({ count, rows } = await Letter_Document.findAndCountAll({
                 offset,
                 limit,
-                order: [['created_at', 'DESC']]
+                order: [['created_at', 'DESC']],
+                include: [
+                    {
+                        model: Document_Department_Access,
+                        attributes: ['department_id', 'access_level'], 
+                        as: 'DocDepartmentAccess',
+                    }
+                ]
             }));
             
         }
