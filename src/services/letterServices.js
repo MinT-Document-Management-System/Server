@@ -71,7 +71,7 @@ class LetterService {
             let department_result = await DepartmentService.get_department_details(department)
             const department_id = department_result[0].department_id
             const new_doc_dep_access = await Document_Department_Access.create({
-                document_id, department_id
+                document_id, department_id, privileged_user_within_department: [], access_level: "Own" 
             })
         }
         for (let i = 0;  i < department_list.length; i++) {
