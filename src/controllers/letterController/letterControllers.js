@@ -57,6 +57,19 @@ const upload_letter_version = async function (req, res) {
     }
 }
 
+const request_letter_deletion = async function (req, res) {
+    try {
+        const public_id = req.params.public_id
+        
+        const deletion_request = await LetterService.request_letter_deletion(public_id)
+
+        res.status(200).json({ message: "Letter Deletion Request has been successfully sent to Record Officials. You will be notified soon."})
+
+    } catch (error) {
+        res.status(error.status || 500).json({error: error.message})        
+    }
+}
+
 const delete_letter = async function (req, res){
     try {
         const public_id = req.params.public_id
@@ -93,4 +106,4 @@ const revoke_access = async function (req, res) {
         res.status(error.status || 500).json({error: error.message})
     }
 }
-module.exports = { upload_letter, get_letter, get_all_letters, delete_letter, upload_letter_version, grant_access, revoke_access}
+module.exports = { upload_letter, get_letter, get_all_letters, request_letter_deletion, delete_letter, upload_letter_version, grant_access, revoke_access}

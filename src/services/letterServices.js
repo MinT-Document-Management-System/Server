@@ -145,6 +145,10 @@ class LetterService {
         return { count: unique_counts, rows }
     }
 
+    async request_letter_deletion(public_id) {
+        // TODO - Send Letter to the Record Official Requesting for Letter Deletion.
+    }
+
     async delete_letter(public_id) {
         try {
             await delete_file_from_cloudinary(public_id)
