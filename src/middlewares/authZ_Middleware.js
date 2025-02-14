@@ -24,20 +24,26 @@ const authorize = async (req, res, next) => {
 
         switch (primaryRoute) {
             case 'user':
-                
-                break;
+                if (secondaryRoute in RBAC.user.general) break
+                if (user.role_name in ['it', 'admin']) break
+                return res.status(401).json({ message: 'Unauthorized' })
         
             case 'letter':
-                
-                break;
+                if (user.role_name in ['record_official', 'admin']) break
+                if (user.role_name === 'it') { return res.status(401).json({ message: 'IT officiers are unauthorized to access letter endpoints.' }) }
+                if (secondaryRoute in RBAC.letter.general) break
+                if (user.role_name === 'department_head' && secondaryRoute in RBAC.letter.department_head) break 
+                return res.status(401).json({ message: 'Unauthorized' })
         
             case 'department':
-                
+                if (secondaryRoute in RBAC.department.general) break
+                if (user.role_name in ['staff', 'record_official', 'department_head']) return res.status(401).json({ message: 'Unauthorized' })
                 break;
         
             case 'role':
-                
-                break;
+                if (user.role_name in ['it', 'admin']) break
+                if (secondaryRoute in RBAC.role.general) break
+                return res.status(401).json({ message: 'Unauthorized' })
         
             case 'placeholder':
                 

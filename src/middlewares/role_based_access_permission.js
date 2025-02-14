@@ -4,7 +4,7 @@ const RBAC = {
         general: ['get_user_data']  // All except the it & admin.
     },
     letter: {
-        general: ['upload_letter', 'get_letter', 'get_all_letters', 'upload_letter_version', 'request_letter_deletion'], // it has no access
+        general: ['upload_letter', 'get_letter', 'get_all_letters', 'upload_letter_version', 'request_letter_deletion'], // IT has no access
         department_head: ['grant_access', 'revoke_access'],
     },
     role: {
