@@ -172,11 +172,25 @@ class LetterService {
         }
     }
 
-    async grant_access(user_id, letter_id) {
-        // TODO
+    async grant_access(granter_user, users_id_list, letter_id) {
+        if (!(granter_user.role_name in ['admin', 'record_official', 'department_head'])) {
+            return res.status(401).json({ message: 'Unauthorized. Only admin, record official, or department head can grant access to a document.' })
+        }
+        let granted_users = []
+        let grant_failed_users = []
+        for(let i = 0; i < users_id_list.length; i++) {
+            if (granter_user.role_name === 'department_head') {
+                // Check if the users_id_list[i] has same department as the granter_user
+                // if not, append user to grant_failed_list, then continue
+            }
+            // add it to the list in the database if not already on the list
+            // append the user_id to the granted_users list
+
+        }
+        // return the success and failed lists. {granted_users, grant_failed_users.}
     } 
 
-    async revoke_access(user_id, letter_id) {
+    async revoke_access(revoker_user, users_id_list, letter_id) {
         // TODO
     }
 }

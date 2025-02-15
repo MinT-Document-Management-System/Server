@@ -83,10 +83,11 @@ const delete_letter = async function (req, res){
 
 const grant_access = async function (req, res){
     try {
-        const user_id = req.body.user_id
+        const granter_user = req.user
+        const users_id_list = req.body.users_id_list
         const letter_id = req.body.letter_id
 
-        const grant_result = await LetterService.grant_access(user_id, letter_id)
+        const grant_result = await LetterService.grant_access(granter_user, users_id_list, letter_id)
 
         res.status(200).json(grant_result)
     } catch (error) {
@@ -96,10 +97,11 @@ const grant_access = async function (req, res){
 
 const revoke_access = async function (req, res) {
     try {
-        const user_id = req.body.user_id
+        const revoker_user = req.user
+        const users_id_list = req.body.users_id_list
         const letter_id = req.body.letter_id
 
-        const revoke_result = await LetterService.revoke_access(user_id, letter_id)
+        const revoke_result = await LetterService.revoke_access(revoker_user, users_id_list, letter_id)
 
         res.status(200).json(revoke_result)
     } catch (error) {
