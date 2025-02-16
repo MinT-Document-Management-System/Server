@@ -5,6 +5,7 @@ const cloudinary = require("../config/cloudinaryConfig")
 const Letter_Document = require("../models/letterDocumentModel")
 const Ingoing_Letter = require("../models/ingoingModel")
 const Outgoing_Letter = require("../models/outgoingModel")
+const { Department } = require('../models/many_to_many_models/user_department_relation')
 const DepartmentService = require("../services/departmentServices")
 const Document_Department_Access = require("../models/docDepAccessModel")
 const uploadFileToCloudinary = require("./file-services/cloudinaryBufferUploader")
@@ -173,13 +174,24 @@ class LetterService {
     }
 
     async grant_access(granter_user, users_id_list, letter_id) {
-        if (!(granter_user.role_name in ['admin', 'record_official', 'department_head'])) {
-            return res.status(401).json({ message: 'Unauthorized. Only admin, record official, or department head can grant access to a document.' })
+        if (!(['admin', 'record_official', 'department_head'].includes(granter_user.role_name))) {
+            console.log(granter_user.role_name)
+            const error = new Error('Unauthorized. Only admin, record official, or department head can grant access to a document.' )
+            error.status = 401; throw error
         }
         let granted_users = []
         let grant_failed_users = []
         for(let i = 0; i < users_id_list.length; i++) {
+            // console.log(granter_user)
             if (granter_user.role_name === 'department_head') {
+                const departments_granter_head = await Department.findAll({
+                    attributes: ['department_name'],
+                    where: {
+                        department_head_id: granter_user.user_id,
+                    },
+                    raw: true, // To return plain JSON objects
+                });
+                console.log(departments_granter_head)
                 // Check if the users_id_list[i] has same department as the granter_user
                 // if not, append user to grant_failed_list, then continue
             }
