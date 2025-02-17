@@ -26,7 +26,8 @@ const Document_Department_Access = sequelize.define("Document_Department_Access"
         },
         privileged_user_within_department: {
             type: DataTypes.ARRAY(DataTypes.INTEGER),
-            allowNull: true
+            defaultValue: [],
+            allowNull: false
         },
         access_level: {
             type: DataTypes.STRING(20),
