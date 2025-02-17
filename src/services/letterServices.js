@@ -5,7 +5,7 @@ const cloudinary = require("../config/cloudinaryConfig")
 const Letter_Document = require("../models/letterDocumentModel")
 const Ingoing_Letter = require("../models/ingoingModel")
 const Outgoing_Letter = require("../models/outgoingModel")
-const { Department } = require('../models/many_to_many_models/user_department_relation')
+const { Department, User_Department } = require('../models/many_to_many_models/user_department_relation')
 const DepartmentService = require("../services/departmentServices")
 const Document_Department_Access = require("../models/docDepAccessModel")
 const uploadFileToCloudinary = require("./file-services/cloudinaryBufferUploader")
@@ -181,19 +181,77 @@ class LetterService {
         }
         let granted_users = []
         let grant_failed_users = []
+        let has_access_before_users = []
         for(let i = 0; i < users_id_list.length; i++) {
-            // console.log(granter_user)
             if (granter_user.role_name === 'department_head') {
-                const departments_granter_head = await Department.findAll({
-                    attributes: ['department_name'],
+                let departments_headed_by_granter = await Department.findAll({
+                    attributes: ['department_id'],
                     where: {
                         department_head_id: granter_user.user_id,
                     },
                     raw: true, // To return plain JSON objects
                 });
-                console.log(departments_granter_head)
-                // Check if the users_id_list[i] has same department as the granter_user
-                // if not, append user to grant_failed_list, then continue
+                departments_headed_by_granter = departments_headed_by_granter.map(dept => dept.department_id);
+
+                let departments_of_user =  await User_Department.findAll({
+                    attributes: ['department_id'],
+                    where: { user_id: users_id_list[i] },
+                    raw: true  
+                });
+                departments_of_user = departments_of_user.map(item => item.department_id);
+            
+                let common_departments = departments_headed_by_granter.filter(dep => departments_of_user.includes(dep));
+                if (common_departments.length === 0) {
+                    grant_failed_users.push(users_id_list[i]);
+                    continue;
+                }
+
+                let record = await Document_Department_Access.findOne({
+                    where: {
+                      document_id: letter_id,
+                      department_id: common_departments[0]
+                    }
+                  });
+                
+                  if (record) {
+                    let currentPrivileged = record.privileged_user_within_department || [];
+                    if (!currentPrivileged.includes(users_id_list[i])) {
+                      currentPrivileged.push(users_id_list[i]);
+                      record.privileged_user_within_department = currentPrivileged;
+                      await record.save();
+                    }
+                    else {
+                        has_access_before_users.push(users_id_list[i]);
+                    }
+                 }
+                 else {
+                    grant_failed_users.push(users_id_list[i]);
+                 }
+            }
+            else if (['record_official', 'admin'].includes(granter_user.role_name)) {
+                let record = await Document_Department_Access.findOne({
+                    where: {
+                      document_id: letter_id,
+                    }
+                  });
+                
+                  if (record) {
+                    let currentPrivileged = record.privileged_user_within_department || [];
+                    if (!currentPrivileged.includes(users_id_list[i])) {
+                      currentPrivileged.push(users_id_list[i]);
+                      record.privileged_user_within_department = currentPrivileged;
+                      await record.save();
+                    }
+                    else {
+                        has_access_before_users.push(users_id_list[i]);
+                    }
+                 }
+                 else {
+                    grant_failed_users.push(users_id_list[i]);
+                 }
+                } 
+            else {
+                grant_failed_users.push(users_id_list[i]);
             }
             // add it to the list in the database if not already on the list
             // append the user_id to the granted_users list
